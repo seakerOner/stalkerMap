@@ -77,6 +77,7 @@ function getPortAndtarget(protocol, fullURL, target, port) {
         }
 
         let isIPv4 = net.isIPv4(target);
+        let isIPv6 = net.isIPv6(target);
         let isCleanHostname = sanatizeHostname(target);
         if (isIPv4 === false) {
             if (isCleanHostname === true) {
@@ -84,6 +85,11 @@ function getPortAndtarget(protocol, fullURL, target, port) {
                 console.log(`Hostname recognized!`)
             } else {
                 throw new Error(`The IP is not a valid IPv4! (${target})`);
+            }
+
+            if (isIPv6 === true) {
+                targetType = "IPv6"
+                console.log('IPv6 recognized!')
             }
         } else {
             targetType = "IPv4"

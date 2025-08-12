@@ -1,8 +1,9 @@
 //Port Scanning
 import net from "node:net";
 import dns from "node:dns";
-import { createPortServicesFile, createTargetDirectory, createDnsIpsFile } from "../utils/logger.js";
+import { createPortServicesFile, createTargetDirectory, createDnsIpsFile, createDnsResolveFiles, createDnsResolveDirectory } from "../utils/logger.js";
 import {getDnsIpsFile} from "../utils/wordlistLoader.js";
+import { Interface } from "node:readline/promises";
       
 const dnsPromises = dns.promises;
 
@@ -16,12 +17,15 @@ export async function scanner(urlData, CTFmode) {
         if (CTFmode == true) {
             if (urlData.getTargetType == "dns") {
                 await dnsLookup(urlData);
-                console.log("PORT SCAN: ")
+                // console.log("PORT SCAN: ")
                 // let servicesList = getServices(urlData);
                 // createPortServicesFile(urlData.getTarget, servicesList)
             }
         } else if (CTFmode == false){
-            dnsResolver(urlData);
+            if (urlData.getTargetType == "dns") {
+                createDnsResolveDirectory(urlData.getTarget)
+                dnsResolver(urlData);
+            }
         }
     }
     //  const client = net.createConnection({ port:urlData.getPort })
@@ -46,17 +50,22 @@ async function dnsLookup(urlData) {
 
 async function dnsResolver(urlData) {
     //maybe use ttl (time to live) as a timer so we know when we can re-resolve again
-   
-    await dnsPromises.resolve4(urlData.getTarget[{ttl: true}]).then((addressesV4)=>{
+    
+    const options = {
+        ttl: true,
+    }
+    await dnsPromises.resolve4(urlData.getTarget,options).then((addressesV4)=>{
         console.log("We got some IPv4's!!")
         console.log(addressesV4)
+        createDnsResolveFiles(urlData.getTarget, "IPv4_addresses", addressesV4)
     }).catch((err)=>{
         console.error(err + " (Something went wrong resolving the IPv4's of the given DNS)");
     })
 
-    await dnsPromises.resolve6(urlData.getTarget[{ttl: true}]).then((addressesV6)=>{
+    await dnsPromises.resolve6(urlData.getTarget, options).then((addressesV6)=>{
         console.log("We got some IPv6's!!")
         console.log(addressesV6)
+        createDnsResolveFiles(urlData.getTarget, "IPv6_addresses", addressesV6)
     }).catch((err)=>{
         console.error(err + " (Something went wrong resolving the IPv6's of the given DNS)");
     })
@@ -64,6 +73,7 @@ async function dnsResolver(urlData) {
     await dnsPromises.resolveCaa(urlData.getTarget).then((recordsCaa)=>{
         console.log("We got some Caa records of the Hostname!!")
         console.log(recordsCaa)
+        createDnsResolveFiles(urlData.getTarget, "Caa_Records", recordsCaa)
     }).catch((err)=>{
         console.error(err + " (Something went wrong resolving the Caa records of the given DNS)");
     })
@@ -71,6 +81,7 @@ async function dnsResolver(urlData) {
     await dnsPromises.resolveCname(urlData.getTarget).then((recordsCname)=>{
         console.log("We got some Cname records of the Hostname!!")
         console.log(recordsCname)
+        createDnsResolveFiles(urlData.getTarget, "Cname_Records", recordsCname)
     }).catch((err)=>{
         console.error(err + " (Something went wrong resolving the Cname records of the given DNS)");
     })
@@ -78,6 +89,7 @@ async function dnsResolver(urlData) {
     await dnsPromises.resolveMx(urlData.getTarget).then((recordsMx)=>{
         console.log("We got some Mx records for the Hostname!!")
         console.log(recordsMx)
+        createDnsResolveFiles(urlData.getTarget, "Mx_Records", recordsMx)
     }).catch((err)=>{
         console.error(err + " (Something went wrong resolving the Mx records of the given DNS)");
     })
@@ -85,6 +97,7 @@ async function dnsResolver(urlData) {
     await dnsPromises.resolveNaptr(urlData.getTarget).then((recordsNaptr)=>{
         console.log("We got some Naptr records of the Hostname!!")
         console.log(recordsNaptr)
+        createDnsResolveFiles(urlData.getTarget, "Naptr_Records", recordsNaptr)
     }).catch((err)=>{
         console.error(err + " (Something went wrong resolving the Naptr records of the given DNS)");
     })
@@ -92,6 +105,7 @@ async function dnsResolver(urlData) {
     await dnsPromises.resolveNs(urlData.getTarget).then((recordsNs)=>{
         console.log("We got some Ns records of the Hostname!!")
         console.log(recordsNs)
+        createDnsResolveFiles(urlData.getTarget, "Ns_Records", recordsNs)
     }).catch((err)=>{
         console.error(err + " (Something went wrong resolving the Ns records of the given DNS)");
     })
@@ -99,6 +113,7 @@ async function dnsResolver(urlData) {
     await dnsPromises.resolvePtr(urlData.getTarget).then((recordsPtr)=>{
         console.log("We got some Ptr records of the Hostname!!")
         console.log(recordsPtr)
+        createDnsResolveFiles(urlData.getTarget, "Ptr_Records", recordsPtr)
     }).catch((err)=>{
         console.error(err + " (Something went wrong resolving the Ptr records of the given DNS)");
     })
@@ -106,6 +121,7 @@ async function dnsResolver(urlData) {
     await dnsPromises.resolveSoa(urlData.getTarget).then((recordsSoa)=>{
         console.log("We got some Soa records of the Hostname!!")
         console.log(recordsSoa)
+        createDnsResolveFiles(urlData.getTarget, "Soa_Records", recordsSoa)
     }).catch((err)=>{
         console.error(err + " (Something went wrong resolving the Soa records of the given DNS)");
     })
@@ -113,6 +129,7 @@ async function dnsResolver(urlData) {
     await dnsPromises.resolveSrv(urlData.getTarget).then((recordsSrv)=>{
         console.log("We got some Srv records of the Hostname!!")
         console.log(recordsSrv)
+        createDnsResolveFiles(urlData.getTarget, "Srv_Records", recordsSrv)
     }).catch((err)=>{
         console.error(err + " (Something went wrong resolving the Srv records of the given DNS)");
     })
@@ -120,6 +137,7 @@ async function dnsResolver(urlData) {
     await dnsPromises.resolveTxt(urlData.getTarget).then((recordsTxt)=>{
         console.log("We got some Txt records of the Hostname!!")
         console.log(recordsTxt)
+        createDnsResolveFiles(urlData.getTarget, "Txt_Records", recordsTxt)
     }).catch((err)=>{
         console.error(err + " (Something went wrong resolving the Txt records of the given DNS)");
     })

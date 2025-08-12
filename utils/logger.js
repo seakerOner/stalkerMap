@@ -42,3 +42,23 @@ export function createDnsIpsFile(target, dnsIPs) {
         })
     
 }
+
+export async function createDnsResolveDirectory(target) {
+    if (!fs.existsSync(`../data/appData/${target}/DnsInfo`)) {
+        console.log("There is no DnsInfo directory for the target " + target); 
+        console.log("Creating the directory...")
+        const projectFolder = new URL(`../data/appData/${target}/DnsInfo`, import.meta.url)
+        const createDir = await mkdir(projectFolder, { recursive: true })
+        console.log("Created " + createDir)
+    } else {
+        console.log(target + " DnsInfo directory already exists")
+    }
+}
+
+export function createDnsResolveFiles(target, fileName, data) {
+        data = JSON.stringify(data);
+        fs.writeFile(`./data/appData/${target}/DnsInfo/${fileName}.json`, data, "utf8",(err)=> {
+            if (err) console.error(err)
+        })
+    
+}
