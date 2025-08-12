@@ -1,9 +1,12 @@
 //Port Scanning
 import net from "node:net";
 import dns from "node:dns";
-import { createPortServicesFile, createTargetDirectory, createDnsIpsFile, createDnsResolveFiles, createDnsResolveDirectory } from "../utils/logger.js";
-import {getDnsIpsFile} from "../utils/wordlistLoader.js";
-import { Interface } from "node:readline/promises";
+import { createPortServicesFile, 
+    createTargetDirectory, 
+    createDnsIpsFile, 
+    createDnsResolveFiles, 
+    createDnsResolveDirectory } from "../utils/logger.js";
+import {getDnsIpsFile, getResolveDnsIpsFiles} from "../utils/wordlistLoader.js";
       
 const dnsPromises = dns.promises;
 
@@ -17,9 +20,7 @@ export async function scanner(urlData, CTFmode) {
         if (CTFmode == true) {
             if (urlData.getTargetType == "dns") {
                 await dnsLookup(urlData);
-                // console.log("PORT SCAN: ")
-                // let servicesList = getServices(urlData);
-                // createPortServicesFile(urlData.getTarget, servicesList)
+                scanPorts(urlData, CTFmode)
             }
         } else if (CTFmode == false){
             if (urlData.getTargetType == "dns") {
@@ -39,6 +40,7 @@ async function dnsLookup(urlData) {
         order: "ipv4first"
     }
     
+    // @ts-ignore
     await dnsPromises.lookup(urlData.getTarget,dnsOptions).then((addresses)=>{
         console.log("Looked up some IPs!");
         console.log(addresses)
@@ -153,12 +155,22 @@ async function getDNSfromIP(urlData) {
     })
 }
 
-async function getServices(urlData) {
+async function scanPorts(urlData , CTFmode) {
+    if (CTFmode == true) {
+        const ipList = await getDnsIpsFile(urlData.getTarget)
+    } else if (CTFmode == false) {
+        const ipList = getResolveDnsIpsFiles(urlData.getTarget)
+    }
+    let servicesList = await getServices(urlData.getTarget, urlData.getPort);
+    createPortServicesFile(urlData.getTarget, servicesList)
+}
+
+async function getServices(target, port) {
     var servicesList = {}
-    if (urlData.getPort === '') {
+    if (port === '') {
         for (let i = 1; i <= 65536; i++) {
-            await dnsPromises.lookupService(urlData.getTarget, i).then((result)=>{
-            console.log(result.hostname + " " + result.service)
+            await dnsPromises.lookupService(target, i).then((result)=>{
+            console.log("Scanning")
             let service = result.service
             servicesList.i = service
         }).catch((err)=>{
@@ -166,12 +178,12 @@ async function getServices(urlData) {
         })
         }
     } else {
-        await dnsPromises.lookupService(urlData.getTarget, urlData.getPort).then((result)=>{
+        await dnsPromises.lookupService(target, port).then((result)=>{
             console.log(result.hostname + " " + result.service)
             let service = result.service
             servicesList.urlData.getPort = service
         }).catch((err)=>{
-            throw err + " (Something went wrong getting the service of the port "+ urlData.getPort +")";
+            throw err + " (Something went wrong getting the service of the port "+ port +")";
         })
     }
     return servicesList
