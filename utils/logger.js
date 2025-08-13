@@ -1,5 +1,5 @@
 //logging on console/files
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir } from "node:fs/promises";
 import fs from "node:fs";
 
 
@@ -53,10 +53,19 @@ export async function createDnsResolveDirectory(target) {
     }
 }
 
-export function createDnsResolveFiles(target, fileName, data) {
-        data = JSON.stringify(data);
-        fs.writeFile(`./data/appData/${target}/DnsInfo/${fileName}.json`, data, "utf8",(err)=> {
-            if (err) console.error(err)
-        })
-    
+export function createDnsResolveFiles(target, fileName, data, fromNS = false, fromDig = false) {
+    let path = ``
+    if (fromNS == true) {
+        path = `./data/appData/${target}/DnsInfo/${fileName}UsingNsRecord.json`    
+    } else if (fromNS == false) {
+        path = `./data/appData/${target}/DnsInfo/${fileName}.json`
+    }
+    if (fromDig == true) {
+        path = `./data/appData/${target}/DnsInfo/${fileName}UsingNsRecord_WithDig.json`
+    }
+    data = JSON.stringify(data);
+    fs.writeFile(path, data, "utf8",(err)=> {
+        if (err) console.error(err)
+    })
+        
 }

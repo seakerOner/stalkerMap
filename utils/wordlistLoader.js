@@ -1,5 +1,6 @@
 //Read and parse wordlists   `./data/utils/${target}/DnsIPs.json`
 import { readFile } from "node:fs/promises"
+import fs from "node:fs";  
 
 export async function getDnsIpsFile(target) {
     try {
@@ -27,3 +28,36 @@ export async function getResolveDnsIpsFiles(target) {
         }    
 }
 
+export async function getNsRecords(target, usingDig = false) {
+    if (usingDig == true) {
+        if (fs.existsSync(`../data/appData/${target}/DnsInfo/Ns_Records_WithDig.json`)) {
+            const filePath = new URL(`../data/appData/${target}/DnsInfo/Ns_Records_WithDig.json`, import.meta.url)
+            const contents = await readFile(filePath, { encoding: "utf8" })
+            const contentsParsed = JSON.parse(contents)
+            return contentsParsed.ANSWER.map(record => record.data)
+        } else {
+            console.error("No NS records file using dig command found")
+        }
+    } else {
+        if (fs.existsSync(`../data/appData/${target}/DnsInfo/Ns_Records.json`)) {
+            const filePath = new URL(`../data/appData/${target}/DnsInfo/Ns_Records.json`, import.meta.url)
+            const contents = await readFile(filePath, { encoding: "utf8" })
+            const contentsParsed = JSON.parse(contents)
+            return contentsParsed
+        } else {
+            console.error("No NS records file found")
+        }
+
+    }
+}
+
+export async function getSoaRecords(target) {
+    if (fs.existsSync(`../data/appData/${target}/DnsInfo/Soa_Records.json`)) {
+        const filePath = new URL(`../data/appData/${target}/DnsInfo/Soa_Records.json`, import.meta.url)
+        const contents = await readFile(filePath, { encoding: "utf8" })
+        const contentsParsed = JSON.parse(contents)
+        return contentsParsed
+    } else {
+        console.error("No SOA records file found");
+    }
+}
