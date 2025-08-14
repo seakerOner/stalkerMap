@@ -20,7 +20,7 @@ export async function scanner(urlData, CTFmode) {
         if (CTFmode == true) {
             if (urlData.getTargetType == "dns") {
                 await dnsLookup(urlData);
-                scanPorts(urlData, CTFmode)
+                //scanPorts(urlData, CTFmode)
             }
         } else if (CTFmode == false){
             if (urlData.getTargetType == "dns") {

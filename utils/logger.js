@@ -53,18 +53,19 @@ export async function createDnsResolveDirectory(target) {
     }
 }
 
-export function createDnsResolveFiles(target, fileName, data, fromNS = false, fromDig = false) {
+export async function createDnsResolveFiles(target, fileName, data, fromNS = false, fromDig = false) {
     let path = ``
     if (fromNS == true) {
         path = `./data/appData/${target}/DnsInfo/${fileName}UsingNsRecord.json`    
+        data = JSON.stringify(data);
     } else if (fromNS == false) {
         path = `./data/appData/${target}/DnsInfo/${fileName}.json`
+        data = JSON.stringify(data);
     }
     if (fromDig == true) {
         path = `./data/appData/${target}/DnsInfo/${fileName}UsingNsRecord_WithDig.json`
     }
-    data = JSON.stringify(data);
-    fs.writeFile(path, data, "utf8",(err)=> {
+    await fs.writeFile(path, data, "utf8",(err)=> {
         if (err) console.error(err)
     })
         

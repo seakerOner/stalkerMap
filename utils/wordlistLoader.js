@@ -13,16 +13,44 @@ export async function getDnsIpsFile(target) {
     }
 }
 
-export async function getResolveDnsIpsFiles(target) {
+export async function getResolveDnsIpsFiles(target, fromNsRecords = false, server = ``) {
     try {
-        const filePathIpV4 = new URL(`../data/appData/${target}/DnsInfo/IPv4_addresses.json`, import.meta.url)
-        const filePathIpV6 = new URL(`../data/appData/${target}/DnsInfo/IPv6_addresses.json`, import.meta.url)
-        const contentsV4 = await readFile(filePathIpV4, { encoding: "utf8" })
-        const contentsV6 = await readFile(filePathIpV6, { encoding: "utf8" })
-        const contentsV4Parsed = JSON.parse(contentsV4)
-        const contentsV6Parsed = JSON.parse(contentsV6)
-        const contentsV0 = contentsV4Parsed.concat(contentsV6Parsed)
-        return contentsV0
+        var filePathIpV4 
+        var filePathIpV6 
+        if (fromNsRecords == true) {
+            filePathIpV4 = new URL(`../data/appData/${target}/DnsInfo/IPv4_addresses_${server}_UsingNsRecord.json`, import.meta.url)
+            filePathIpV6 = new URL(`../data/appData/${target}/DnsInfo/IPv6_addresses_${server}_UsingNsRecord.json`, import.meta.url)
+            
+            if (await fs.existsSync(`./data/appData/${target}/DnsInfo/IPv4_addresses_${server}_UsingNsRecord.json`)) {
+                const contentsV4 = await readFile(filePathIpV4, { encoding: "utf8" })
+                const contentsV4Parsed = JSON.parse(contentsV4)
+                if (await fs.existsSync(`./data/appData/${target}/DnsInfo/IPv6_addresses_${server}_UsingNsRecord.json`)) {
+                    const contentsV6 = await readFile(filePathIpV6, { encoding: "utf8" })
+                    const contentsV6Parsed = JSON.parse(contentsV6)
+                    const contentsV0 = contentsV4Parsed.concat(contentsV6Parsed)
+                    return contentsV0
+                }
+                const contentsV0 = contentsV4Parsed
+                return contentsV0
+            }
+        }
+        if (fromNsRecords == false){
+            filePathIpV4 = new URL(`../data/appData/${target}/DnsInfo/IPv4_addresses_${server}.json`, import.meta.url)
+            filePathIpV6 = new URL(`../data/appData/${target}/DnsInfo/IPv6_addresses_${server}.json`, import.meta.url)
+            if (await fs.existsSync(`./data/appData/${target}/DnsInfo/IPv4_addresses_${server}.json`)) {
+                const contentsV4 = await readFile(filePathIpV4, { encoding: "utf8" })
+                const contentsV4Parsed = JSON.parse(contentsV4)
+                if (await fs.existsSync(`./data/appData/${target}/DnsInfo/IPv6_addresses_${server}.json`)) {
+                    const contentsV6 = await readFile(filePathIpV6, { encoding: "utf8" })
+                    const contentsV6Parsed = JSON.parse(contentsV6)
+                    const contentsV0 = contentsV4Parsed.concat(contentsV6Parsed)
+                    return contentsV0
+                }
+                const contentsV0 = contentsV4Parsed
+                return contentsV0
+        }
+        
+}
     } catch (error) {
             console.error(error)
         }    
@@ -30,24 +58,27 @@ export async function getResolveDnsIpsFiles(target) {
 
 export async function getNsRecords(target, usingDig = false) {
     if (usingDig == true) {
-        if (fs.existsSync(`../data/appData/${target}/DnsInfo/Ns_Records_WithDig.json`)) {
+        try {
             const filePath = new URL(`../data/appData/${target}/DnsInfo/Ns_Records_WithDig.json`, import.meta.url)
             const contents = await readFile(filePath, { encoding: "utf8" })
             const contentsParsed = JSON.parse(contents)
             return contentsParsed.ANSWER.map(record => record.data)
-        } else {
+        } catch (err) {
             console.error("No NS records file using dig command found")
         }
-    } else {
-        if (fs.existsSync(`../data/appData/${target}/DnsInfo/Ns_Records.json`)) {
+        
+        
+    } 
+     if (usingDig == false){
+        try {
             const filePath = new URL(`../data/appData/${target}/DnsInfo/Ns_Records.json`, import.meta.url)
             const contents = await readFile(filePath, { encoding: "utf8" })
             const contentsParsed = JSON.parse(contents)
             return contentsParsed
-        } else {
+        } catch (error) {
             console.error("No NS records file found")
         }
-
+            
     }
 }
 
