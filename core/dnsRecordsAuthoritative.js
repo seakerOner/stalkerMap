@@ -78,6 +78,7 @@ export async function forceRecords(target, failedRecords) {
     for (let z = 0; z < serverQuantity; z++) {
         let server = nsRecords[z]
         await dnsPromises.resolve4(server,options).then(async(addressesV4)=>{
+            //could add IPv6 functionality later on
             console.log("We got some IPv4's from the NS records!!")
             console.log(addressesV4)
             
