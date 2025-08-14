@@ -57,14 +57,13 @@ export async function createDnsResolveFiles(target, fileName, data, fromNS = fal
     let path = ``
     if (fromNS == true) {
         path = `./data/appData/${target}/DnsInfo/${fileName}UsingNsRecord.json`    
-        data = JSON.stringify(data);
     } else if (fromNS == false) {
         path = `./data/appData/${target}/DnsInfo/${fileName}.json`
-        data = JSON.stringify(data);
     }
     if (fromDig == true) {
         path = `./data/appData/${target}/DnsInfo/${fileName}UsingNsRecord_WithDig.json`
     }
+    data = JSON.stringify(data);
     await fs.writeFile(path, data, "utf8",(err)=> {
         if (err) console.error(err)
     })

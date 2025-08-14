@@ -92,3 +92,38 @@ export async function getSoaRecords(target) {
         console.error("No SOA records file found");
     }
 }
+
+export async function parseDigOutput(stdout) {
+    const lines = stdout.trim().split("\n")
+
+    const results = lines.map(line => 
+        line.trim()).filter(line => line.length > 0 && !line.startsWith(";"))
+        .map(line => {
+            const parts = line.split(/\s+/)
+
+            if (parts.length < 4) {
+                return null
+            }
+
+            const name = parts[0]
+            const ttl = parseInt(parts[1], 10) || null
+            const cls = parts[2]
+            const type = parts[3]
+
+            if (type.toUpperCase() === "OPT") {
+                return null
+            }
+
+            const data = parts.splice(4).join(" ")
+            return {
+                name,
+                ttl,
+                class: cls,
+                type,
+                data
+            }
+        })
+        .filter(record => record !== null)
+    
+    return results
+}

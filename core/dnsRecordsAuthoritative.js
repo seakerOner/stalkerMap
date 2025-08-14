@@ -1,7 +1,7 @@
 import { Resolver } from "node:dns/promises"
 import dns from "node:dns"
 import { createDnsResolveFiles } from "../utils/logger.js";
-import { getNsRecords, getSoaRecords, getResolveDnsIpsFiles} from "../utils/wordlistLoader.js";
+import { getNsRecords, getSoaRecords, getResolveDnsIpsFiles, parseDigOutput } from "../utils/wordlistLoader.js";
 import { exec } from "node:child_process";
 import { promisify } from "node:util";
 import { fail } from "node:assert";
@@ -123,42 +123,70 @@ async function digRecords(target, remainingFailedRecords) {
                 console.error("Dig commmand error: " + stderr) 
             } else {
                 // const data = JSON.parse(stdout)
-                const data = stdout
-                console.log(`We got some data from the ${record} record using the dig command with the server: ${server}`)
-                console.log(stdout)
+                let parsedData = await parseDigOutput(stdout)
+                if (stdout.length < 1) {
+                    console.log("Success getting the record "+ record +" for the server "+ server +" but there is no data inside it")
+                }else {
+                    console.log(`We got some data from the ${record} record using the dig command with the server: ${server}`)
+                    console.log(stdout)
+                }
+
                 const isUsingDig = true
                 if (record == "A") {
-                    await createDnsResolveFiles(target, `IPv4_addresses_${server}_`, data, false, isUsingDig)
+                    if (parsedData.length > 0 && parsedData !== undefined) {
+                        
+                        await createDnsResolveFiles(target, `IPv4_addresses_${server}_`, parsedData, false, isUsingDig)
+                    }
                 }
                 if (record == "AAAA") {
-                    await createDnsResolveFiles(target, `IPv6_addresses_${server}_`, data, false, isUsingDig)
+                    if (parsedData.length > 0 && parsedData !== undefined) {
+                        await createDnsResolveFiles(target, `IPv6_addresses_${server}_`, parsedData, false, isUsingDig)
+                    }
                 }
                 if (record == "CAA") {
-                    await createDnsResolveFiles(target, `Caa_Records_${server}_`, data, false, isUsingDig)
+                    if (parsedData.length > 0 && parsedData !== undefined) {
+                        await createDnsResolveFiles(target, `Caa_Records_${server}_`, parsedData, false, isUsingDig)
+                    }
                 }
                 if (record == "CNAME") {
-                    await createDnsResolveFiles(target, `Cname_Records_${server}_`, data, false, isUsingDig)
+                    if (parsedData.length > 0 && parsedData !== undefined) {
+                        await createDnsResolveFiles(target, `Cname_Records_${server}_`, parsedData, false, isUsingDig)
+                    }
                 }
                 if (record == "MX") {
-                    await createDnsResolveFiles(target, `Mx_Records_${server}_`, data, false, isUsingDig)
+                    if (parsedData.length > 0 && parsedData !== undefined) {
+                        await createDnsResolveFiles(target, `Mx_Records_${server}_`, parsedData, false, isUsingDig)
+                    }
                 }
                 if (record == "NAPTR") {
-                    await createDnsResolveFiles(target, `Naptr_Records_${server}_`, data, false, isUsingDig)
+                    if (parsedData.length > 0 && parsedData !== undefined) {
+                        await createDnsResolveFiles(target, `Naptr_Records_${server}_`, parsedData, false, isUsingDig)
+                    }
                 }
                 if (record == "NS") {
-                    await createDnsResolveFiles(target, `Ns_Records_${server}_`, data, false, isUsingDig)
+                    if (parsedData.length > 0 && parsedData !== undefined) {
+                        await createDnsResolveFiles(target, `Ns_Records_${server}_`, parsedData, false, isUsingDig)
+                    }
                 }
                 if (record == "PTR") {
-                    await createDnsResolveFiles(target, `Ptr_Records_${server}_`, data, false, isUsingDig)
+                    if (parsedData.length > 0 && parsedData !== undefined) {
+                        await createDnsResolveFiles(target, `Ptr_Records_${server}_`, parsedData, false, isUsingDig)
+                    }
                 }
                 if (record == "SOA") {
-                    await createDnsResolveFiles(target, `Soa_Records_${server}_`, data, false, isUsingDig)
+                    if (parsedData.length > 0 && parsedData !== undefined) {
+                        await createDnsResolveFiles(target, `Soa_Records_${server}_`, parsedData, false, isUsingDig)
+                    }
                 }
                 if (record == "SVR") {
-                    await createDnsResolveFiles(target, `Srv_Records_${server}_`, data, false, isUsingDig)
+                    if (parsedData.length > 0 && parsedData !== undefined) {
+                        await createDnsResolveFiles(target, `Srv_Records_${server}_`, parsedData, false, isUsingDig)
+                    }
                 }
                 if (record == "TXT") {
-                    await createDnsResolveFiles(target, `Txt_Records_${server}_`, data, false, isUsingDig)
+                    if (parsedData.length > 0 && parsedData !== undefined) {
+                        await createDnsResolveFiles(target, `Txt_Records_${server}_`, parsedData, false, isUsingDig)
+                    }
                 }
             }
             
