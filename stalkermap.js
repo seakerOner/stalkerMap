@@ -1,6 +1,7 @@
 import readline from 'node:readline';
 import { sanatizeURL } from './utils/sanatizeURL.js';
 import { scanner } from './core/scanner.js';
+import { createDesktopOutputFolder } from "./utils/createOutputDir.js"
 
 const askTerminal = readline.createInterface({
     input: process.stdin,
@@ -27,12 +28,13 @@ console.log("Don't use CTFmode for better performance at scale and get more deta
 var separator = "------------------------------------------------------------------------------------";
 
 (async () => {
+    createDesktopOutputFolder()
     const CTFmode = await ask(`Enable CTF mode? (Y/N): `);
     if (CTFmode !== 'Y' && CTFmode !== 'N' && CTFmode !== 'y' && CTFmode !== 'n') {
         throw new Error("Invalid input. (Use `Y` or `N`)");
     }
     console.log(separator);
-
+    
     const url = await ask(`Input the url: `);
     console.log(separator);   
     var cleanURLdata = sanatizeURL(url);   

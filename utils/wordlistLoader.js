@@ -1,10 +1,13 @@
 //Read and parse wordlists   `./data/utils/${target}/DnsIPs.json`
 import { readFile } from "node:fs/promises"
 import fs from "node:fs";  
+import { getOutputFolder } from "./createOutputDir.js";
+
+const desktopOutputFolder = getOutputFolder()
 
 export async function getDnsIpsFile(target) {
     try {
-        const filePath = new URL(`../data/appData/${target}/DnsIPs.json`, import.meta.url)
+        const filePath = new URL(`${desktopOutputFolder}/data/appData/${target}/DnsIPs.json`, import.meta.url)
         const contents = await readFile(filePath, { encoding: "utf8" })
         const contentsParsed = JSON.parse(contents)
         return contentsParsed
@@ -18,13 +21,13 @@ export async function getResolveDnsIpsFiles(target, fromNsRecords = false, serve
         var filePathIpV4 
         var filePathIpV6 
         if (fromNsRecords == true) {
-            filePathIpV4 = new URL(`../data/appData/${target}/DnsInfo/IPv4_addresses_${server}_UsingNsRecord.json`, import.meta.url)
-            filePathIpV6 = new URL(`../data/appData/${target}/DnsInfo/IPv6_addresses_${server}_UsingNsRecord.json`, import.meta.url)
+            filePathIpV4 = new URL(`${desktopOutputFolder}/data/appData/${target}/DnsInfo/IPv4_addresses_${server}_UsingNsRecord.json`, import.meta.url)
+            filePathIpV6 = new URL(`${desktopOutputFolder}/data/appData/${target}/DnsInfo/IPv6_addresses_${server}_UsingNsRecord.json`, import.meta.url)
             
-            if (await fs.existsSync(`./data/appData/${target}/DnsInfo/IPv4_addresses_${server}_UsingNsRecord.json`)) {
+            if (await fs.existsSync(`${desktopOutputFolder}/data/appData/${target}/DnsInfo/IPv4_addresses_${server}_UsingNsRecord.json`)) {
                 const contentsV4 = await readFile(filePathIpV4, { encoding: "utf8" })
                 const contentsV4Parsed = JSON.parse(contentsV4)
-                if (await fs.existsSync(`./data/appData/${target}/DnsInfo/IPv6_addresses_${server}_UsingNsRecord.json`)) {
+                if (await fs.existsSync(`${desktopOutputFolder}/data/appData/${target}/DnsInfo/IPv6_addresses_${server}_UsingNsRecord.json`)) {
                     const contentsV6 = await readFile(filePathIpV6, { encoding: "utf8" })
                     const contentsV6Parsed = JSON.parse(contentsV6)
                     const contentsV0 = contentsV4Parsed.concat(contentsV6Parsed)
@@ -35,12 +38,12 @@ export async function getResolveDnsIpsFiles(target, fromNsRecords = false, serve
             }
         }
         if (fromNsRecords == false){
-            filePathIpV4 = new URL(`../data/appData/${target}/DnsInfo/IPv4_addresses_${server}.json`, import.meta.url)
-            filePathIpV6 = new URL(`../data/appData/${target}/DnsInfo/IPv6_addresses_${server}.json`, import.meta.url)
-            if (await fs.existsSync(`./data/appData/${target}/DnsInfo/IPv4_addresses_${server}.json`)) {
+            filePathIpV4 = new URL(`${desktopOutputFolder}/data/appData/${target}/DnsInfo/IPv4_addresses.json`, import.meta.url)
+            filePathIpV6 = new URL(`${desktopOutputFolder}/data/appData/${target}/DnsInfo/IPv6_addresses.json`, import.meta.url)
+            if (await fs.existsSync(`${desktopOutputFolder}/data/appData/${target}/DnsInfo/IPv4_addresses.json`)) {
                 const contentsV4 = await readFile(filePathIpV4, { encoding: "utf8" })
                 const contentsV4Parsed = JSON.parse(contentsV4)
-                if (await fs.existsSync(`./data/appData/${target}/DnsInfo/IPv6_addresses_${server}.json`)) {
+                if (await fs.existsSync(`${desktopOutputFolder}/data/appData/${target}/DnsInfo/IPv6_addresses.json`)) {
                     const contentsV6 = await readFile(filePathIpV6, { encoding: "utf8" })
                     const contentsV6Parsed = JSON.parse(contentsV6)
                     const contentsV0 = contentsV4Parsed.concat(contentsV6Parsed)
@@ -59,7 +62,7 @@ export async function getResolveDnsIpsFiles(target, fromNsRecords = false, serve
 export async function getNsRecords(target, usingDig = false) {
     if (usingDig == true) {
         try {
-            const filePath = new URL(`../data/appData/${target}/DnsInfo/Ns_Records_WithDig.json`, import.meta.url)
+            const filePath = new URL(`${desktopOutputFolder}/data/appData/${target}/DnsInfo/Ns_Records_WithDig.json`, import.meta.url)
             const contents = await readFile(filePath, { encoding: "utf8" })
             const contentsParsed = JSON.parse(contents)
             return contentsParsed.ANSWER.map(record => record.data)
@@ -71,7 +74,7 @@ export async function getNsRecords(target, usingDig = false) {
     } 
      if (usingDig == false){
         try {
-            const filePath = new URL(`../data/appData/${target}/DnsInfo/Ns_Records.json`, import.meta.url)
+            const filePath = new URL(`${desktopOutputFolder}/data/appData/${target}/DnsInfo/Ns_Records.json`, import.meta.url)
             const contents = await readFile(filePath, { encoding: "utf8" })
             const contentsParsed = JSON.parse(contents)
             return contentsParsed
@@ -83,7 +86,7 @@ export async function getNsRecords(target, usingDig = false) {
 }
 
 export async function getSoaRecords(target) {
-    if (fs.existsSync(`../data/appData/${target}/DnsInfo/Soa_Records.json`)) {
+    if (fs.existsSync(`${desktopOutputFolder}/data/appData/${target}/DnsInfo/Soa_Records.json`)) {
         const filePath = new URL(`../data/appData/${target}/DnsInfo/Soa_Records.json`, import.meta.url)
         const contents = await readFile(filePath, { encoding: "utf8" })
         const contentsParsed = JSON.parse(contents)
@@ -126,4 +129,15 @@ export async function parseDigOutput(stdout) {
         .filter(record => record !== null)
     
     return results
+}
+
+export async function getTCPservices() {
+    if (fs.existsSync(`../data/appData/misc/tcp-services.json`)) {
+        const filePath = new URL(`../data/appData/misc/tcp-services.json`, import.meta.url)
+        const contents = await readFile(filePath, { encoding: "utf8" })
+        const contentsParsed = JSON.parse(contents)
+        return contentsParsed
+    } else {
+        console.error("No TCP services Wordlist file found");
+    }
 }

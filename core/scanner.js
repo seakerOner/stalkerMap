@@ -6,7 +6,7 @@ import { createPortServicesFile,
     createDnsIpsFile, 
     createDnsResolveFiles, 
     createDnsResolveDirectory } from "../utils/logger.js";
-import {getDnsIpsFile, getResolveDnsIpsFiles} from "../utils/wordlistLoader.js";
+import {getDnsIpsFile, getResolveDnsIpsFiles, getTCPservices } from "../utils/wordlistLoader.js";
 import { forceRecords } from "./dnsRecordsAuthoritative.js";
 const dnsPromises = dns.promises;
 
@@ -20,7 +20,7 @@ export async function scanner(urlData, CTFmode) {
         if (CTFmode == true) {
             if (urlData.getTargetType == "dns") {
                 await dnsLookup(urlData);
-                //scanPorts(urlData, CTFmode)
+                scanPorts(urlData, CTFmode)
             }
         } else if (CTFmode == false){
             if (urlData.getTargetType == "dns") {
@@ -245,32 +245,56 @@ async function getDNSfromIP(urlData) {
 }
 
 async function scanPorts(urlData , CTFmode) {
+    let ipList
     if (CTFmode == true) {
-        const ipList = await getDnsIpsFile(urlData.getTarget)
+        ipList = await getDnsIpsFile(urlData.getTarget)
     } else if (CTFmode == false) {
-        const ipList = getResolveDnsIpsFiles(urlData.getTarget)
+        ipList = await getResolveDnsIpsFiles(urlData.getTarget)
     }
-    let servicesList = await getServices(urlData.getTarget, urlData.getPort);
-    createPortServicesFile(urlData.getTarget, servicesList)
+    let servicesList = await getServices(ipList, urlData.getPort);
+    await createPortServicesFile(urlData.getTarget, servicesList)
 }
 
-async function getServices(target, port) {
+async function getServices(targetIP, port) {
     var servicesList = {}
     if (port === '') {
-        for (let i = 1; i <= 65536; i++) {
-            await dnsPromises.lookupService(target, i).then((result)=>{
+        // use the command "UV_THREADPOOL_SIZE=64 node stalkermap.js" before running the tool to increase threads (Default is 4)
+        let threads = parseInt(process.env.UV_THREADPOOL_SIZE) || 4
+        //Below is the "speed" of port scanner, be careful increasing this number!
+        let batchsize = threads * 1.6
+        const allPorts = Array.from({ length: 65536 }, (_, i) => i)
+        const irrelevantPorts = new Set([
+            "echo", "discard", "daytime", "chargen", "who", "rje", "comsat", "printer", "talk", "ntalk", "rcpbind", "nfs",
+            "mountd", "ident", "syslog", "bootpc", "bootps", "tftp", "rip"
+        ])
+        const servicesNamesAll = await getTCPservices()
+
+        for (let i = 0; i < allPorts.length; i += batchsize) {
+            let portsBatched = allPorts.slice(i, i + batchsize)
             console.log("Scanning")
-            let service = result.service
-            servicesList.i = service
-        }).catch((err)=>{
-            throw err + " (Something went wrong getting the service of the port "+ i +")";
-        })
+            
+            await Promise.all(portsBatched.map(async port => {
+                if (!port || port === 0) return
+                // if (port > 49151) return 
+
+                await dnsPromises.lookupService(targetIP, port).then((result)=>{
+                    if (irrelevantPorts.has(result.hostname)) return
+
+                    if (servicesNamesAll.has(result.hostname)){
+                        servicesList.port = result.hostname
+                    }
+            }).catch((err)=>{
+                console.log (err + " (Something went wrong getting the service of the port "+ i +")")
+            })
+
+            }))
         }
     } else {
-        await dnsPromises.lookupService(target, port).then((result)=>{
+        //make read port service ok 
+        await dnsPromises.lookupService(targetIP, port).then((result)=>{
             console.log(result.hostname + " " + result.service)
             let service = result.service
-            servicesList.urlData.getPort = service
+            servicesList.port = service
         }).catch((err)=>{
             throw err + " (Something went wrong getting the service of the port "+ port +")";
         })
