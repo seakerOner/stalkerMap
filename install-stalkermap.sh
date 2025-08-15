@@ -4,8 +4,8 @@
 DIR=$(pwd)
 
 # Declare the paths to the JSON files
-TCP_JSON_FILE="$DIR/data/appData/misc/tcp-services.json"
-UDP_JSON_FILE="$DIR/data/appData/misc/udp-services.json"
+TCP_JSON_FILE="$DIR/data/appData/misc/tcp-services.txt"
+UDP_JSON_FILE="$DIR/data/appData/misc/udp-services.txt"
 
 HOME_DIR="$HOME"
 

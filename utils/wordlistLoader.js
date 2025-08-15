@@ -2,6 +2,8 @@
 import { readFile } from "node:fs/promises"
 import fs from "node:fs";  
 import { getOutputFolder } from "./createOutputDir.js";
+import { rejects } from "node:assert";
+import { createInterface } from "node:readline";
 
 const desktopOutputFolder = getOutputFolder()
 
@@ -10,7 +12,12 @@ export async function getDnsIpsFile(target) {
         const filePath = new URL(`${desktopOutputFolder}/data/appData/${target}/DnsIPs.json`, import.meta.url)
         const contents = await readFile(filePath, { encoding: "utf8" })
         const contentsParsed = JSON.parse(contents)
-        return contentsParsed[0].address
+        // for (let i = 0; i < Object.keys(contentsParsed).length; i++) {
+        //     if (contentsParsed[i].family == "4") {
+        //         return contentsParsed[i].address
+        //     }
+        // }
+        return contentsParsed
     } catch (error) {
         console.error(error)
     }
@@ -131,13 +138,36 @@ export async function parseDigOutput(stdout) {
     return results
 }
 
-export async function getTCPservices() {
-    if (fs.existsSync(`${desktopOutputFolder}/data/appData/misc/tcp-services.json`)) {
-        const filePath = new URL(`../data/appData/misc/tcp-services.json`, import.meta.url)
-        const contents = await readFile(filePath, { encoding: "utf8" })
-        const contentsParsed = JSON.parse(contents)
-        return contentsParsed
-    } else {
-        console.error("No TCP services Wordlist file found");
+export function checkTCPservices(serviceToAnalize) {
+
+   return new Promise(async (resolve, reject) => {
+    try {
+       const fileStream = await fs.createReadStream(`${desktopOutputFolder}/data/appData/misc/tcp-services.txt`)
+
+       fileStream.on("error", reject)
+
+       const rl = createInterface({
+            input: fileStream,
+            crlfDelay: Infinity
+       })
+
+       await rl.on("line", (line)=>{
+        try {
+            const services = line.split(",").map(s=> s.trim().replace(/^"|"$/g, ``))
+            if (services.includes(serviceToAnalize)) {
+                rl.close()
+                resolve(true)
+            }
+        } catch (error) {
+            console.log(error)
+        }
+       })
+
+       rl.on("close", ()=> {
+            resolve(false)
+       })
+    } catch(err) {
+        console.error(err)
     }
+   })
 }

@@ -6,7 +6,7 @@ import { createPortServicesFile,
     createDnsIpsFile, 
     createDnsResolveFiles, 
     createDnsResolveDirectory } from "../utils/logger.js";
-import {getDnsIpsFile, getResolveDnsIpsFiles, getTCPservices } from "../utils/wordlistLoader.js";
+import {getDnsIpsFile, getResolveDnsIpsFiles, checkTCPservices } from "../utils/wordlistLoader.js";
 import { forceRecords } from "./dnsRecordsAuthoritative.js";
 const dnsPromises = dns.promises;
 
@@ -245,56 +245,77 @@ async function getDNSfromIP(urlData) {
 }
 
 async function scanPorts(urlData , CTFmode) {
-    let ipList
+    let ipV4
     if (CTFmode == true) {
-        ipList = await getDnsIpsFile(urlData.getTarget)
+        ipV4 = await getDnsIpsFile(urlData.getTarget)
     } else if (CTFmode == false) {
-        ipList = await getResolveDnsIpsFiles(urlData.getTarget)
+        //test this
+        ipV4 = await getResolveDnsIpsFiles(urlData.getTarget)
     }
-    let servicesList = await getServices(ipList, urlData.getPort);
+    let servicesList = await getServices(ipV4, urlData.getPort);
     await createPortServicesFile(urlData.getTarget, servicesList)
 }
 
-async function getServices(targetIP, inputPort) {
-    var servicesList = {}
-    if (inputPort === '') {
-        let threads = parseInt(process.env.UV_THREADPOOL_SIZE) || 4
-        //Below is the "speed" of port scanner, be careful increasing this number!
-        let batchsize = threads * 1.6
-        const allPorts = Array.from({ length: 65536 }, (_, i) => i)
-        const irrelevantPorts = new Set([
-            "echo", "discard", "daytime", "chargen", "who", "rje", "comsat", "printer", "talk", "ntalk", "rcpbind", "nfs",
-            "mountd", "ident", "syslog", "bootpc", "bootps", "tftp", "rip", "un", "unknown"
-        ])
-        const servicesNamesAll = await getTCPservices()
-
-        for (let i = 0; i < allPorts.length; i += batchsize) {
-            let portsBatched = allPorts.slice(i, i + batchsize)
-            console.log("Scanning")
-            
-            await Promise.all(portsBatched.map(async port => {
-                if (!port || port === 0) return
-
-                await dnsPromises.lookupService(targetIP, port).then((result)=>{
-                    if (irrelevantPorts.has(result.hostname)) return
-
-                    if (servicesNamesAll.has(result.hostname)){
-                        servicesList.port = result.hostname
+async function getServices(targetIPs, inputPort) {
+    var foundServices = {}
+    for (let i = 0; i < Object.keys(targetIPs).length; i++) {
+        if (targetIPs[i].family == "4") {
+            if (inputPort === '') {
+                let threads = parseInt(process.env.UV_THREADPOOL_SIZE) || 4
+                //Below is the "speed" of port scanner, be careful increasing this number!
+                let batchsize = threads * 1.6
+                const allPorts = Array.from({ length: 65536 }, (_, i) => i)
+                const irrelevantPorts = new Set([
+                    "echo", "discard", "daytime", "chargen", "who", "rje", "comsat", "printer", "talk", "ntalk", "rcpbind", "nfs",
+                    "mountd", "ident", "syslog", "bootpc", "bootps", "tftp", "rip", "un", "unknown"
+                ])
+                
+                for (let x = 0; x < allPorts.length; x += batchsize) {
+                    let portsBatched = allPorts.slice(x, x + batchsize)
+                    process.stdout.write(`\r[${x}/${allPorts.length}]`)
+                    
+                    await Promise.all(portsBatched.map(async port => {
+                        if (!port || port === 0) return
+        
+                        await dnsPromises.lookupService(targetIPs[i].address, port).then(async (result)=>{
+                            if (irrelevantPorts.has(result.service)) return
+        
+                                let isRelevantService = await checkTCPservices((result.service))
+                                if (isRelevantService === true){
+                                    console.log(result.hostname + " "+ targetIPs[i].address +" " + result.service)
+                                    if (!foundServices[result.hostname]) {
+                                        foundServices[result.hostname] = [];
+                                    }
+                                    foundServices[result.hostname].push({
+                                    ip_target: targetIPs[i].address,
+                                    port: parseInt(inputPort),
+                                    service: result.service
+                                })
+                            }
+                    }).catch((err)=>{
+                        console.error(err + " (Something went wrong getting the service of the port "+ x +")")
+                    })
+        
+                    }))
+                }
+            } else {
+                await dnsPromises.lookupService(targetIPs[i].address, parseInt(inputPort)).then((result)=>{
+                    console.log(result.hostname + " "+ targetIPs[i].address +" " + result.service)
+                    
+                    if (!foundServices[result.hostname]) {
+                        foundServices[result.hostname] = [];
                     }
-            }).catch((err)=>{
-                console.log (err + " (Something went wrong getting the service of the port "+ i +")")
-            })
-
-            }))
+                    foundServices[result.hostname].push({
+                        ip_target: targetIPs[i].address,
+                        port: parseInt(inputPort),
+                        service: result.service
+                    })
+                }).catch((err)=>{
+                    console.error(err + " (Something went wrong getting the service of the port "+ inputPort +")")
+                })
+            }
         }
-    } else {
-        await dnsPromises.lookupService(targetIP, parseInt(inputPort)).then((result)=>{
-            console.log(result.hostname + " " + result.service)
-            let service = result.service
-            servicesList.port = service
-        }).catch((err)=>{
-            throw err + " (Something went wrong getting the service of the port "+ inputPort +")";
-        })
     }
-    return servicesList
+    console.log("\nScan done!")
+    return foundServices
 }
