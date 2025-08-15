@@ -255,17 +255,16 @@ async function scanPorts(urlData , CTFmode) {
     await createPortServicesFile(urlData.getTarget, servicesList)
 }
 
-async function getServices(targetIP, port) {
+async function getServices(targetIP, inputPort) {
     var servicesList = {}
-    if (port === '') {
-        // use the command "UV_THREADPOOL_SIZE=64 node stalkermap.js" before running the tool to increase threads (Default is 4)
+    if (inputPort === '') {
         let threads = parseInt(process.env.UV_THREADPOOL_SIZE) || 4
         //Below is the "speed" of port scanner, be careful increasing this number!
         let batchsize = threads * 1.6
         const allPorts = Array.from({ length: 65536 }, (_, i) => i)
         const irrelevantPorts = new Set([
             "echo", "discard", "daytime", "chargen", "who", "rje", "comsat", "printer", "talk", "ntalk", "rcpbind", "nfs",
-            "mountd", "ident", "syslog", "bootpc", "bootps", "tftp", "rip"
+            "mountd", "ident", "syslog", "bootpc", "bootps", "tftp", "rip", "un", "unknown"
         ])
         const servicesNamesAll = await getTCPservices()
 
@@ -275,7 +274,6 @@ async function getServices(targetIP, port) {
             
             await Promise.all(portsBatched.map(async port => {
                 if (!port || port === 0) return
-                // if (port > 49151) return 
 
                 await dnsPromises.lookupService(targetIP, port).then((result)=>{
                     if (irrelevantPorts.has(result.hostname)) return
@@ -290,13 +288,12 @@ async function getServices(targetIP, port) {
             }))
         }
     } else {
-        //make read port service ok 
-        await dnsPromises.lookupService(targetIP, port).then((result)=>{
+        await dnsPromises.lookupService(targetIP, parseInt(inputPort)).then((result)=>{
             console.log(result.hostname + " " + result.service)
             let service = result.service
             servicesList.port = service
         }).catch((err)=>{
-            throw err + " (Something went wrong getting the service of the port "+ port +")";
+            throw err + " (Something went wrong getting the service of the port "+ inputPort +")";
         })
     }
     return servicesList

@@ -13,7 +13,7 @@ function ask(question) {
     })
 }
 
-console.log("-Port Scanner, Dir search recursively (All info gathered is stored in /stalkermap/data/{IP/DNS})")
+console.log("-Port Scanner, Dir search recursively (All info gathered is stored in ~Desktop/stalkermapOUTPUT/data/{IP/DNS})")
 console.log("------------------------------------------------------------------------------------")
 console.log("███████ ████████  █████  ██      ██   ██ ███████ ██████  ███    ███  █████  ██████  ");
 console.log("██         ██    ██   ██ ██      ██  ██  ██      ██   ██ ████  ████ ██   ██ ██   ██ ");

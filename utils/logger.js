@@ -30,7 +30,7 @@ export async function createTargetDirectory(target) {
 }
 export function createPortServicesFile(target, servicesList) {
     servicesList = JSON.stringify(servicesList);
-        fs.writeFile(`${desktopOutputFolder}/data/appData/${target}/DnsIPs.json`, servicesList, "utf8",(err)=> {
+        fs.writeFile(`${desktopOutputFolder}/data/appData/${target}/PortServices.json`, servicesList, "utf8",(err)=> {
             if (err) console.error(err)
         })
 }
