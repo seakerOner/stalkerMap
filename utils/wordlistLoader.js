@@ -10,7 +10,7 @@ export async function getDnsIpsFile(target) {
         const filePath = new URL(`${desktopOutputFolder}/data/appData/${target}/DnsIPs.json`, import.meta.url)
         const contents = await readFile(filePath, { encoding: "utf8" })
         const contentsParsed = JSON.parse(contents)
-        return contentsParsed
+        return contentsParsed[0].address
     } catch (error) {
         console.error(error)
     }
@@ -132,7 +132,7 @@ export async function parseDigOutput(stdout) {
 }
 
 export async function getTCPservices() {
-    if (fs.existsSync(`../data/appData/misc/tcp-services.json`)) {
+    if (fs.existsSync(`${desktopOutputFolder}/data/appData/misc/tcp-services.json`)) {
         const filePath = new URL(`../data/appData/misc/tcp-services.json`, import.meta.url)
         const contents = await readFile(filePath, { encoding: "utf8" })
         const contentsParsed = JSON.parse(contents)

@@ -3,10 +3,22 @@
 # Get current directory path
 DIR=$(pwd)
 
-# Create directory for the tool and copy stalkermap.js to it
-sudo mkdir -p /usr/local/share/stalkermap
+# Declare the paths to the JSON files
+TCP_JSON_FILE="$DIR/data/appData/misc/tcp-services.json"
+UDP_JSON_FILE="$DIR/data/appData/misc/udp-services.json"
+
+HOME_DIR="$HOME"
+
+# Declare the output directory and related paths
+OUTPUT_DIR="$HOME_DIR/Desktop/stalkermapOUTPUT/data/appData/misc"
+
+# Create directory for the tool and copy stalkermap project to it
 sudo cp -r "$DIR/"* /usr/local/share/stalkermap/
 sudo chmod -R 755 /usr/local/share/stalkermap
+
+sudo mkdir -p $OUTPUT_DIR
+sudo cp -r "$TCP_JSON_FILE" $OUTPUT_DIR
+sudo cp -r "$UDP_JSON_FILE" $OUTPUT_DIR
 # Copy script to /usr/local/bin
 sudo cp "$DIR/stalkermap.sh" /usr/local/bin/stalkermap
 
