@@ -138,9 +138,10 @@ export async function parseDigOutput(stdout) {
     return results
 }
 
-export function checkTCPservices(serviceToAnalize) {
+export async function checkTCPservices(serviceToAnalize) {
 
    return new Promise(async (resolve, reject) => {
+    let resolved = false
     try {
        const fileStream = await fs.createReadStream(`${desktopOutputFolder}/data/appData/misc/tcp-services.txt`)
 
@@ -151,12 +152,15 @@ export function checkTCPservices(serviceToAnalize) {
             crlfDelay: Infinity
        })
 
-       await rl.on("line", (line)=>{
+       rl.on("line", (line)=>{
         try {
             const services = line.split(",").map(s=> s.trim().replace(/^"|"$/g, ``))
             if (services.includes(serviceToAnalize)) {
-                rl.close()
-                resolve(true)
+                if (!resolved) {
+                    resolved = true
+                    rl.close()
+                    resolve(true)
+                }
             }
         } catch (error) {
             console.log(error)
@@ -164,10 +168,17 @@ export function checkTCPservices(serviceToAnalize) {
        })
 
        rl.on("close", ()=> {
+        if (!resolved) {
+            resolved = true
             resolve(false)
+        }
        })
     } catch(err) {
         console.error(err)
+        if (!resolved) {
+            resolved = true
+            reject(err)
+        }
     }
    })
 }

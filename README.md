@@ -9,7 +9,7 @@
 -Have fun :D<br />
 
 # Be aware!
-(Only DNS related functionality and partial port scanning features is working atm) <br />
+(Only DNS related functionality and partial port scanning features are working atm) <br />
 -This tool uses on occasion the command "dig" for dns querries, so please have it up to date to avoid errors. <br />
 -If you don't want to install the tool and just execute it you can type on the terminal: "node ." or "node stalkermap.js" inside the project directory to execute it. (Will only use 4 threads as its the default number of threads on NodeJS even if your pc has more than that!) <br />
 -All info gathered by the tool will be stored on <b>"~Desktop/stalkermapOUTPUT/data/{targetName}"</b> <br />
