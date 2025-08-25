@@ -112,9 +112,13 @@ var separator =
       chosenWordlistClean >= 0
     ) {
       if (
+        // @ts-ignore
         cleanURLdata.getPort == "" ||
+        // @ts-ignore
         parseInt(cleanURLdata.getPort) != 80 ||
+        // @ts-ignore
         parseInt(cleanURLdata.getPort) != 443 ||
+        // @ts-ignore
         parseInt(cleanURLdata.getPort) != 8080
       ) {
         portToEnumerate = await ask(`What port do you want to enumerate?`);
