@@ -280,12 +280,18 @@ export async function getWordlistDirPaths() {
   }
 }
 export async function getChosenWordlist(path) {
-  if (fs.existsSync(path)) {
-    const filePath = new URL(path, import.meta.url);
+  if (fs.existsSync(`${desktopOutputFolder}/data/appData/wordlists/${path}`)) {
+    const filePath = new URL(
+      `${desktopOutputFolder}/data/appData/wordlists/${path}`,
+      import.meta.url,
+    );
     const contents = await readFile(filePath, { encoding: "utf8" });
-    const contentsParsed = JSON.parse(contents);
+    const contentsParsed = contents.split(/\r?\n/).filter(Boolean);
     return contentsParsed;
   } else {
-    console.error("No wordlist file found" + path);
+    console.error(
+      "No wordlist file found at: " +
+        `${desktopOutputFolder}/data/appData/wordlists/${path}`,
+    );
   }
 }

@@ -48,7 +48,7 @@ export async function forceRecords(target, failedRecords) {
       console.log(
         "Remaining failed records after trying to get them with the NS records found:",
       );
-      console.log(remainingFailedRecords);
+      console.table(remainingFailedRecords);
       await digRecords(target, remainingFailedRecords);
     }
   } else if (hasNS == false) {
@@ -68,7 +68,7 @@ export async function forceRecords(target, failedRecords) {
         console.log(
           "Remaining failed records after trying to get them with the NS records found:",
         );
-        console.log(remainingFailedRecords);
+        console.table(remainingFailedRecords);
         await digRecords(target, remainingFailedRecords);
       }
     }
@@ -100,7 +100,7 @@ async function retryResolveRecords(target, nsRecords, failedRecords) {
       .then(async (addressesV4) => {
         //could add IPv6 functionality later on
         console.log("We got some IPv4's from the NS records!!");
-        console.log(addressesV4);
+        console.table(addressesV4);
 
         await createDnsResolveFiles(
           target,
@@ -321,7 +321,7 @@ async function getRecords(target, server, failedRecords, isFromNsRecords) {
         .resolve4(target, options)
         .then((addressesV4) => {
           console.log("We got some IPv4's!!");
-          console.log(addressesV4);
+          console.table(addressesV4);
           if (isFromNsRecords == true) {
             createDnsResolveFiles(
               target,
@@ -350,7 +350,7 @@ async function getRecords(target, server, failedRecords, isFromNsRecords) {
         .resolve6(target, options)
         .then((addressesV6) => {
           console.log("We got some IPv6's!!");
-          console.log(addressesV6);
+          console.table(addressesV6);
           if (isFromNsRecords == true) {
             createDnsResolveFiles(
               target,
@@ -376,7 +376,7 @@ async function getRecords(target, server, failedRecords, isFromNsRecords) {
         .resolveCaa(target)
         .then((recordsCaa) => {
           console.log("We got some Caa records of the Hostname!!");
-          console.log(recordsCaa);
+          console.table(recordsCaa);
           if (isFromNsRecords == true) {
             createDnsResolveFiles(
               target,
@@ -402,7 +402,7 @@ async function getRecords(target, server, failedRecords, isFromNsRecords) {
         .resolveCname(target)
         .then((recordsCname) => {
           console.log("We got some Cname records of the Hostname!!");
-          console.log(recordsCname);
+          console.table(recordsCname);
           if (isFromNsRecords == true) {
             createDnsResolveFiles(
               target,
@@ -428,7 +428,7 @@ async function getRecords(target, server, failedRecords, isFromNsRecords) {
         .resolveMx(target)
         .then((recordsMx) => {
           console.log("We got some Mx records for the Hostname!!");
-          console.log(recordsMx);
+          console.table(recordsMx);
           if (isFromNsRecords == true) {
             createDnsResolveFiles(
               target,
@@ -454,7 +454,7 @@ async function getRecords(target, server, failedRecords, isFromNsRecords) {
         .resolveNaptr(target)
         .then((recordsNaptr) => {
           console.log("We got some Naptr records of the Hostname!!");
-          console.log(recordsNaptr);
+          console.table(recordsNaptr);
           if (isFromNsRecords == true) {
             createDnsResolveFiles(
               target,
@@ -480,7 +480,7 @@ async function getRecords(target, server, failedRecords, isFromNsRecords) {
         .resolveNs(target)
         .then((recordsNs) => {
           console.log("We got some Ns records of the Hostname!!");
-          console.log(recordsNs);
+          console.table(recordsNs);
           if (isFromNsRecords == true) {
             createDnsResolveFiles(
               target,
@@ -506,7 +506,7 @@ async function getRecords(target, server, failedRecords, isFromNsRecords) {
         .resolvePtr(target)
         .then((recordsPtr) => {
           console.log("We got some Ptr records of the Hostname!!");
-          console.log(recordsPtr);
+          console.table(recordsPtr);
           if (isFromNsRecords == true) {
             createDnsResolveFiles(
               target,
@@ -532,7 +532,7 @@ async function getRecords(target, server, failedRecords, isFromNsRecords) {
         .resolveSoa(target)
         .then((recordsSoa) => {
           console.log("We got some Soa records of the Hostname!!");
-          console.log(recordsSoa);
+          console.table(recordsSoa);
           if (isFromNsRecords == true) {
             createDnsResolveFiles(
               target,
@@ -558,7 +558,7 @@ async function getRecords(target, server, failedRecords, isFromNsRecords) {
         .resolveSrv(target)
         .then((recordsSrv) => {
           console.log("We got some Srv records of the Hostname!!");
-          console.log(recordsSrv);
+          console.table(recordsSrv);
           if (isFromNsRecords == true) {
             createDnsResolveFiles(
               target,
@@ -584,7 +584,7 @@ async function getRecords(target, server, failedRecords, isFromNsRecords) {
         .resolveTxt(target)
         .then((recordsTxt) => {
           console.log("We got some Txt records of the Hostname!!");
-          console.log(recordsTxt);
+          console.table(recordsTxt);
           if (isFromNsRecords == true) {
             createDnsResolveFiles(
               target,

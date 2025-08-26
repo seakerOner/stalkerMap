@@ -16,7 +16,10 @@ function ask(question) {
 }
 
 console.log(
-  "-Port Scanner, Dir search recursively (All info gathered is stored in ~Desktop/stalkermapOUTPUT/data/{IP/DNS})",
+  "(All info gathered is stored in ~Desktop/stalkermapOUTPUT/data/{IP/DNS})",
+);
+console.log(
+  `Add your wordlist in the ~Desktop/stalkermapOUTPUT/data/appData/wordlists`,
 );
 console.log(
   "------------------------------------------------------------------------------------",
@@ -69,8 +72,8 @@ var separator =
 
   const url = await ask(`Input the url: `);
   console.log(separator);
-  var cleanURLdata = sanatizeURL(url);
-  console.log(cleanURLdata);
+  var cleanURLdata = await sanatizeURL(url);
+  console.table(cleanURLdata);
 
   console.log(separator);
   const consent = await ask(`We are going to start the scans, you sure?(Y,N):`);
@@ -79,66 +82,68 @@ var separator =
   if (consent == `Y` || consent == `y`) {
     console.log("Let`s start...");
     if (CTFmode == `Y` || CTFmode == `y`) {
-      scanner(cleanURLdata, true);
+      await scanner(cleanURLdata, true);
     } else {
-      scanner(cleanURLdata, false);
+      await scanner(cleanURLdata, false);
+    }
+
+    console.log(separator);
+    console.log("Let's start the directory enumeration!");
+    console.log(separator);
+
+    const directoryWordlistPaths = await getWordlistDirPaths();
+    let countedWordlist = [];
+    console.log(`All wordlist paths`);
+    for (let i = 0; i < directoryWordlistPaths.length; i++) {
+      countedWordlist[i] = [directoryWordlistPaths[i]];
+    }
+    console.log(separator);
+    console.table(countedWordlist);
+    const chosenWordlist = await ask(
+      `Enter the id of the wordlist you want to use (${0}-${directoryWordlistPaths.length - 1}): `,
+    );
+    let changedPort = false;
+    let chosenWordlistClean;
+    let portToEnumerate;
+    if (parseInt(chosenWordlist)) {
+      chosenWordlistClean = parseInt(chosenWordlist);
+      if (
+        chosenWordlistClean <= countedWordlist.length - 1 &&
+        chosenWordlistClean >= 0
+      ) {
+        if (
+          // @ts-ignore
+          cleanURLdata.getPort == "" ||
+          // @ts-ignore
+          parseInt(cleanURLdata.getPort) != 80 ||
+          // @ts-ignore
+          parseInt(cleanURLdata.getPort) != 443 ||
+          // @ts-ignore
+          parseInt(cleanURLdata.getPort) != 8080
+        ) {
+          portToEnumerate = await ask(`What port do you want to enumerate? `);
+          changedPort = true;
+        }
+        if (changedPort == true) {
+          await dirEnum(
+            cleanURLdata,
+            countedWordlist[chosenWordlistClean],
+            portToEnumerate,
+          );
+        } else {
+          await dirEnum(cleanURLdata, countedWordlist[chosenWordlistClean]);
+        }
+        console.log(`Directory enumeration done!`);
+      } else {
+        console.error(`Not a valid wordlist ID!`);
+      }
+    } else {
+      console.error(`Not a number!`);
     }
   } else if (consent == `N` || consent == "n") {
     console.log("Stopping the program!");
     process.exit();
   }
 
-  console.log(separator);
-  console.log("Let's start the directory enumeration!");
-  console.log(separator);
-
-  const directoryWordlistPaths = await getWordlistDirPaths();
-  let countedWordlist = [];
-  for (let i = 0; 0 < directoryWordlistPaths.length; ++i) {
-    console.log(`${i} - ${directoryWordlistPaths}`);
-    countedWordlist[i] = directoryWordlistPaths[i];
-  }
-
-  const chosenWordlist = await ask(
-    `Enter the id of the wordlist you want to use (${0}-${directoryWordlistPaths.length}):`,
-  );
-  let changedPort = false;
-  let chosenWordlistClean;
-  let portToEnumerate;
-  if (parseInt(chosenWordlist)) {
-    chosenWordlistClean = parseInt(chosenWordlist);
-    if (
-      chosenWordlistClean <= countedWordlist.length &&
-      chosenWordlistClean >= 0
-    ) {
-      if (
-        // @ts-ignore
-        cleanURLdata.getPort == "" ||
-        // @ts-ignore
-        parseInt(cleanURLdata.getPort) != 80 ||
-        // @ts-ignore
-        parseInt(cleanURLdata.getPort) != 443 ||
-        // @ts-ignore
-        parseInt(cleanURLdata.getPort) != 8080
-      ) {
-        portToEnumerate = await ask(`What port do you want to enumerate?`);
-        changedPort = true;
-      }
-      if (changedPort == true) {
-        await dirEnum(
-          cleanURLdata,
-          countedWordlist[chosenWordlistClean],
-          portToEnumerate,
-        );
-      } else {
-        await dirEnum(cleanURLdata, countedWordlist[chosenWordlistClean]);
-      }
-    } else {
-      console.error(`Not a valid wordlist ID!`);
-    }
-  } else {
-    console.error(`Not a number!`);
-  }
-  console.log(`Directory enumeration done!`);
   askTerminal.close();
 })();

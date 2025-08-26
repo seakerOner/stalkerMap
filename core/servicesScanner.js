@@ -2,11 +2,11 @@ import net from "node:net";
 import dns from "node:dns";
 import { checkTCPservices } from "../utils/wordlistLoader.js";
 import { setBatchSize } from "../utils/threadVelocitySetter.js";
-
 const dnsPromises = dns.promises;
 
 export async function scanServices(targetIPs, inputPort, targetType) {
   var foundServices = {};
+
   const delay = (ms) =>
     new Promise((resolve) => {
       setTimeout(resolve, ms);
@@ -16,10 +16,7 @@ export async function scanServices(targetIPs, inputPort, targetType) {
     for (let i = 0; i < Object.keys(targetIPs).length; i++) {
       if (targetIPs[i].family == "4") {
         if (inputPort === "") {
-          let threads = parseInt(process.env.UV_THREADPOOL_SIZE) || 4;
-          //Below is the "speed" of port scanner, be careful increasing this number!
-          let maxBatchSize = 150;
-          let batchsize = Math.min(threads * 10, maxBatchSize);
+          let batchsize = await setBatchSize();
           const allPorts = Array.from({ length: 65536 }, (_, i) => i);
           const irrelevantPorts = new Set([
             "echo",
@@ -63,21 +60,16 @@ export async function scanServices(targetIPs, inputPort, targetType) {
                         result.service,
                       );
                       if (isRelevantService === true) {
-                        console.log(
-                          "Target         IP          PORT    Service version",
-                        );
-                        console.log(
-                          "          " +
-                            result.hostname +
-                            " " +
-                            targetIPs[i].address +
-                            ":" +
-                            port +
-                            " " +
-                            result.service +
-                            " " +
-                            isPortOpenn.serviceVersion.version,
-                        );
+                        console.table([
+                          {
+                            Target: result.hostname,
+                            IP: targetIPs[i].address,
+                            Port: port,
+                            Service: result.service,
+                            Version: isPortOpenn.serviceVersion.version,
+                          },
+                        ]);
+
                         if (!foundServices[result.hostname]) {
                           foundServices[result.hostname] = [];
                         }
@@ -111,13 +103,15 @@ export async function scanServices(targetIPs, inputPort, targetType) {
             await dnsPromises
               .lookupService(targetIPs[i].address, parseInt(inputPort))
               .then((result) => {
-                console.log(
-                  result.hostname +
-                    " " +
-                    targetIPs[i].address +
-                    " " +
-                    result.service,
-                );
+                console.table([
+                  {
+                    Target: result.hostname,
+                    IP: targetIPs[i].address,
+                    Service: result.service,
+                    Port: parseInt(inputPort),
+                    IsPortOpen: isPortOpenn.isOpen,
+                  },
+                ]);
 
                 if (!foundServices[result.hostname]) {
                   foundServices[result.hostname] = [];
@@ -200,21 +194,16 @@ export async function scanServices(targetIPs, inputPort, targetType) {
                     result.service,
                   );
                   if (isRelevantService === true) {
-                    console.log(
-                      "Target         IP          PORT    Service version",
-                    );
-                    console.log(
-                      "          " +
-                        result.hostname +
-                        " " +
-                        targetIPs +
-                        ":" +
-                        port +
-                        " " +
-                        result.service +
-                        " " +
-                        isPortOpenn.serviceVersion.version,
-                    );
+                    console.table([
+                      {
+                        Target: result.hostname,
+                        IP: targetIPs,
+                        Port: port,
+                        Service: result.service,
+                        Version: isPortOpenn.serviceVersion.version,
+                      },
+                    ]);
+
                     if (!foundServices[result.hostname]) {
                       foundServices[result.hostname] = [];
                     }
@@ -284,7 +273,10 @@ export async function scanServices(targetIPs, inputPort, targetType) {
       }
     }
   }
-  console.log(foundServices);
+  for (const [target, entries] of Object.entries(foundServices)) {
+    console.log(`Results of: ${target}`);
+    console.table(entries);
+  }
   console.log("\nScan done!");
   return foundServices;
 }

@@ -48,7 +48,6 @@ export async function scanner(urlData, CTFmode) {
   console.log("Let's start the port scan");
   console.log("-------------------------------------");
   await scanPorts(urlData, CTFmode);
-  console.log("Scan port completed!");
 }
 
 async function dnsLookup(target) {
@@ -63,7 +62,7 @@ async function dnsLookup(target) {
     .lookup(target, dnsOptions)
     .then((addresses) => {
       console.log("Looked up some IPs!");
-      console.log(addresses);
+      console.table(addresses);
       createDnsIpsFile(target, addresses);
     })
     .catch((err) => {
@@ -82,7 +81,7 @@ async function dnsResolver(target) {
     .resolve4(target, options)
     .then((addressesV4) => {
       console.log("We got some IPv4's!!");
-      console.log(addressesV4);
+      console.table(addressesV4);
       createDnsResolveFiles(target, "IPv4_addresses", addressesV4);
     })
     .catch((err) => {
@@ -102,7 +101,7 @@ async function dnsResolver(target) {
     .resolve6(target, options)
     .then((addressesV6) => {
       console.log("We got some IPv6's!!");
-      console.log(addressesV6);
+      console.table(addressesV6);
       createDnsResolveFiles(target, "IPv6_addresses", addressesV6);
     })
     .catch((err) => {
@@ -122,7 +121,7 @@ async function dnsResolver(target) {
     .resolveCaa(target)
     .then((recordsCaa) => {
       console.log("We got some Caa records of the Hostname!!");
-      console.log(recordsCaa);
+      console.table(recordsCaa);
       createDnsResolveFiles(target, "Caa_Records", recordsCaa);
     })
     .catch((err) => {
@@ -143,7 +142,7 @@ async function dnsResolver(target) {
     .resolveCname(target)
     .then((recordsCname) => {
       console.log("We got some Cname records of the Hostname!!");
-      console.log(recordsCname);
+      console.table(recordsCname);
       createDnsResolveFiles(target, "Cname_Records", recordsCname);
     })
     .catch((err) => {
@@ -164,7 +163,7 @@ async function dnsResolver(target) {
     .resolveMx(target)
     .then((recordsMx) => {
       console.log("We got some Mx records for the Hostname!!");
-      console.log(recordsMx);
+      console.table(recordsMx);
       createDnsResolveFiles(target, "Mx_Records", recordsMx);
     })
     .catch((err) => {
@@ -185,7 +184,7 @@ async function dnsResolver(target) {
     .resolveNaptr(target)
     .then((recordsNaptr) => {
       console.log("We got some Naptr records of the Hostname!!");
-      console.log(recordsNaptr);
+      console.table(recordsNaptr);
       createDnsResolveFiles(target, "Naptr_Records", recordsNaptr);
     })
     .catch((err) => {
@@ -206,7 +205,7 @@ async function dnsResolver(target) {
     .resolveNs(target)
     .then((recordsNs) => {
       console.log("We got some Ns records of the Hostname!!");
-      console.log(recordsNs);
+      console.table(recordsNs);
       createDnsResolveFiles(target, "Ns_Records", recordsNs);
     })
     .catch((err) => {
@@ -227,7 +226,7 @@ async function dnsResolver(target) {
     .resolvePtr(target)
     .then((recordsPtr) => {
       console.log("We got some Ptr records of the Hostname!!");
-      console.log(recordsPtr);
+      console.table(recordsPtr);
       createDnsResolveFiles(target, "Ptr_Records", recordsPtr);
     })
     .catch((err) => {
@@ -248,7 +247,7 @@ async function dnsResolver(target) {
     .resolveSoa(target)
     .then((recordsSoa) => {
       console.log("We got some Soa records of the Hostname!!");
-      console.log(recordsSoa);
+      console.table(recordsSoa);
       createDnsResolveFiles(target, "Soa_Records", recordsSoa);
     })
     .catch((err) => {
@@ -269,7 +268,7 @@ async function dnsResolver(target) {
     .resolveSrv(target)
     .then((recordsSrv) => {
       console.log("We got some Srv records of the Hostname!!");
-      console.log(recordsSrv);
+      console.table(recordsSrv);
       createDnsResolveFiles(target, "Srv_Records", recordsSrv);
     })
     .catch((err) => {
@@ -290,7 +289,7 @@ async function dnsResolver(target) {
     .resolveTxt(target)
     .then((recordsTxt) => {
       console.log("We got some Txt records of the Hostname!!");
-      console.log(recordsTxt);
+      console.table(recordsTxt);
       createDnsResolveFiles(target, "Txt_Records", recordsTxt);
     })
     .catch((err) => {
@@ -318,7 +317,7 @@ async function getDNSfromIP(target) {
     .reverse(target)
     .then((reversedIPs) => {
       console.log("We reversed some IP addresses and found a DNS!!");
-      console.log(reversedIPs);
+      console.table(reversedIPs);
       createDnsReversedFromIpFile(target, reversedIPs);
       return true;
     })
@@ -337,7 +336,7 @@ async function scanPorts(urlData, CTFmode) {
   } else if (CTFmode == false && urlData.getTargetType == `dns`) {
     //test this
     ipList = await getResolveDnsIpsFiles(urlData.getTarget);
-    console.log(ipList);
+    console.table(ipList);
   } else if (urlData.getTargetType == `IPv4`) {
     ipList = urlData.getTarget;
   }
