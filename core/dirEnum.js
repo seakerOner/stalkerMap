@@ -8,8 +8,7 @@ import { createFoundDirectories } from "../utils/logger.js";
 export async function dirEnum(urlData, wordlistPath, changedPort = -1) {
   let protocolInUse;
   let port;
-  let possibleDirectories = [];
-
+  let contDir = 0;
   let batchsize = await setBatchSize();
 
   if (urlData.getProtocol == `http://`) {
@@ -29,176 +28,50 @@ export async function dirEnum(urlData, wordlistPath, changedPort = -1) {
     });
 
   const wordlist = await getChosenWordlist(wordlistPath);
+
+  let possibleDirectories = [];
+  let interestingStatus = [200, 301, 303, 307, 401, 403, 405, 500, 503];
   for (let x = 0; x < wordlist.length; x += batchsize) {
     let wordlistBatched = wordlist.slice(x, x + batchsize);
-    wordlistBatched.forEach((word) => {
-      const options = {
-        hostname: host,
-        port: port,
-        path: `/${word}`,
-        method: `GET`,
-      };
 
-      const req = protocolInUse.request(options, (res) => {
-        switch (res.statusCode) {
-          case 200:
-            console.log(
-              `Status: ${res.statusCode} | ${urlData.getProtocol}${host}:${port}/${word}`,
-            );
-            possibleDirectories.push([
-              {
-                statusCode: res.statusCode,
-                protocol: urlData.getProtocol,
-                host: host,
-                port: port,
-              },
-            ]);
+    const batchPromises = wordlistBatched.map((word) => {
+      return new Promise((endRequest) => {
+        const options = {
+          hostname: host,
+          port: port,
+          path: `/${word}`,
+          method: `GET`,
+        };
 
-            break;
-          case 301:
+        const req = protocolInUse.request(options, (res) => {
+          if (interestingStatus.includes(res.statusCode)) {
             console.log(
               `Status: ${res.statusCode} | ${urlData.getProtocol}${host}:${port}/${word}`,
             );
-            possibleDirectories.push([
+            possibleDirectories[contDir] = [
               {
                 statusCode: res.statusCode,
                 protocol: urlData.getProtocol,
-                host: host,
+                host: `${host}/${word}`,
                 port: port,
               },
-            ]);
-            break;
-          case 302:
-            console.log(
-              `Status: ${res.statusCode} | ${urlData.getProtocol}${host}:${port}/${word}`,
-            );
-            possibleDirectories.push([
-              {
-                statusCode: res.statusCode,
-                protocol: urlData.getProtocol,
-                host: host,
-                port: port,
-              },
-            ]);
-            break;
-          case 303:
-            console.log(
-              `Status: ${res.statusCode} | ${urlData.getProtocol}${host}:${port}/${word}`,
-            );
-            possibleDirectories.push([
-              {
-                statusCode: res.statusCode,
-                protocol: urlData.getProtocol,
-                host: host,
-                port: port,
-              },
-            ]);
-            break;
-          case 307:
-            console.log(
-              `Status: ${res.statusCode} | ${urlData.getProtocol}${host}:${port}/${word}`,
-            );
-            possibleDirectories.push([
-              {
-                statusCode: res.statusCode,
-                protocol: urlData.getProtocol,
-                host: host,
-                port: port,
-              },
-            ]);
-            break;
-          case 308:
-            console.log(
-              `Status: ${res.statusCode} | ${urlData.getProtocol}${host}:${port}/${word}`,
-            );
-            possibleDirectories.push([
-              {
-                statusCode: res.statusCode,
-                protocol: urlData.getProtocol,
-                host: host,
-                port: port,
-              },
-            ]);
-            break;
-          case 401:
-            console.log(
-              `Status: ${res.statusCode} | ${urlData.getProtocol}${host}:${port}/${word}`,
-            );
-            possibleDirectories.push([
-              {
-                statusCode: res.statusCode,
-                protocol: urlData.getProtocol,
-                host: host,
-                port: port,
-              },
-            ]);
-            break;
-          case 403:
-            console.log(
-              `Status: ${res.statusCode} | ${urlData.getProtocol}${host}:${port}/${word}`,
-            );
-            possibleDirectories.push([
-              {
-                statusCode: res.statusCode,
-                protocol: urlData.getProtocol,
-                host: host,
-                port: port,
-              },
-            ]);
-            break;
-          case 405:
-            console.log(
-              `Status: ${res.statusCode} | ${urlData.getProtocol}${host}:${port}/${word}`,
-            );
-            possibleDirectories.push([
-              {
-                statusCode: res.statusCode,
-                protocol: urlData.getProtocol,
-                host: host,
-                port: port,
-              },
-            ]);
-            break;
-          case 500:
-            console.log(
-              `Status: ${res.statusCode} | ${urlData.getProtocol}${host}:${port}/${word}`,
-            );
-            possibleDirectories.push([
-              {
-                statusCode: res.statusCode,
-                protocol: urlData.getProtocol,
-                host: host,
-                port: port,
-              },
-            ]);
-            break;
-          case 503:
-            console.log(
-              `Status: ${res.statusCode} | ${urlData.getProtocol}${host}:${port}/${word}`,
-            );
-            possibleDirectories.push([
-              {
-                statusCode: res.statusCode,
-                protocol: urlData.getProtocol,
-                host: host,
-                port: port,
-              },
-            ]);
-            break;
-          default:
-            break;
-        }
-        res.resume();
+            ];
+            contDir = contDir + 1;
+          }
+          res.resume();
+          endRequest();
+        });
+
+        req.on(`error`, (e) => {
+          console.error(`Status code: ${e}`);
+          endRequest();
+        });
+        req.end();
       });
-
-      req.on(`error`, (e) => {
-        console.error(`Status code: ${e}`);
-      });
-      req.end();
     });
+    await Promise.all(batchPromises);
     await delay(200);
   }
-  console.log(possibleDirectories);
+  console.log("Done!!!!");
   createFoundDirectories(host, possibleDirectories);
-  return possibleDirectories;
 }

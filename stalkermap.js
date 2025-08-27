@@ -130,10 +130,11 @@ var separator =
             countedWordlist[chosenWordlistClean],
             portToEnumerate,
           );
+          console.log(`Directory enumeration done!`);
         } else {
           await dirEnum(cleanURLdata, countedWordlist[chosenWordlistClean]);
+          console.log(`Directory enumeration done!`);
         }
-        console.log(`Directory enumeration done!`);
       } else {
         console.error(`Not a valid wordlist ID!`);
       }
