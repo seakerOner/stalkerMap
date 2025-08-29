@@ -1,0 +1,197 @@
+$green4-color: #111d13;
+$green3-color: #415d43;
+$green2-color: #a1cca5;
+$green1-color: #8fb996;
+$black-color: black;
+$white-space: 250px;
+
+@font-face {
+  font-family: 'Special Gothic Expanded One';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url("https://cdn.jsdelivr.net/fontsource/fonts/special-gothic-expanded-one@latest/latin-400-normal.woff2") format('woff2'), url("https://cdn.jsdelivr.net/fontsource/fonts/special-gothic-expanded-one@latest/latin-400-normal.woff") format('woff');
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+
+@font-face {
+  font-family: 'Space Mono';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url("https://cdn.jsdelivr.net/fontsource/fonts/space-mono@latest/latin-400-normal.woff2") format('woff2'), url("https://cdn.jsdelivr.net/fontsource/fonts/space-mono@latest/latin-400-normal.woff") format('woff');
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+
+@mixin  makebubbleborder {
+  border-width: 4px;
+  border-style: solid;
+  border-color: transparent;
+}
+
+@mixin makeinnershadow{
+  box-shadow: 
+    inset 0 9px 9px -9px $green4-color,
+    inset 9px 0 9px -9px $green4-color;
+}
+
+html{
+  background-color: $green4-color; 
+  height: 100%;
+}
+
+h1, h2, h3, p, button {
+  font-family: 'Special Gothic Expanded One', sans-serif;
+}
+
+button {
+  @include makebubbleborder();
+
+  transition: border-color 300ms ease-in-out;
+  border-width: 3px;
+  border-radius: 30px;
+  background-color: $green1-color;
+  font-size: 14px;
+  text-align: center;
+
+  &:hover {
+    border-color: $green4-color;
+    cursor: pointer;
+  }
+}
+
+header {
+  @include makebubbleborder();
+  @include makeinnershadow();
+
+  border-radius: 30px;
+  border-color: $green3-color;
+  background-color: $green2-color;
+  width: 100%;
+  max-width: calc(100vw - #{$white-space});
+  margin: 54px auto 20px;
+
+  h1{
+    margin: 0;
+    padding-top: 10px;
+    color: $green3-color;
+    text-align: center;
+    font-size: 60px;
+  }
+
+  p{
+    margin: 0;
+    padding-bottom: 15px;
+    font-family: 'Space Mono', monospace;
+    color: $green3-color;
+    text-align: center;
+    font-size: 30px;
+  }
+}
+
+.dashboard {
+  width: 100%;
+  max-width: calc(100vw - #{$white-space});
+  margin: 0 auto;
+  display: flex;
+  flex-direction: row;
+  min-height: calc(100vh - #{$white-space});
+  overflow: hidden;
+
+  .dashboard-menu {
+    @include makebubbleborder(); 
+    @include makeinnershadow();
+
+
+    border-radius: 30px;
+    border-color: $green3-color;
+    background-color: $green2-color;
+    max-width: 25vw;
+    width: 100%;
+
+      .menu-header {
+      @include makebubbleborder();
+      @include makeinnershadow();
+
+      border-radius: 30px;
+      border-color: $green4-color;
+      background-color: $green3-color;
+      margin: 5px 10px;
+
+      h2 {
+        text-align: center;
+        font-size: 18px;
+
+      }
+    }
+
+    .menu-tree {
+      width: 100%;
+      
+      ul {
+        list-style-type: none;
+      }
+
+      button {
+        margin: 5px 10px;
+        height: 40px;
+        padding-left: 10px;
+        padding-right: 10px;
+      }
+    }
+  }
+
+  .dashboard-outputarea {
+    @include makebubbleborder();
+    @include makeinnershadow();
+
+    border-radius: 30px;
+    border-color: $green3-color;
+    background-color: $green2-color;
+    max-width: 75vw;
+    width: 100%;
+    margin-left: 20px;
+    
+    .outputarea-header {
+      display: flex;
+      flex-direction: row;
+      width: 100%;
+      align-items: center;
+
+      #selected-file{
+        color: white;
+      }
+
+      div {
+        @include makebubbleborder();
+        @include makeinnershadow();
+        
+        border-radius: 30px;
+        border-color: $green4-color;
+        background-color: $green3-color;
+        margin: 5px auto 5px 10px;
+        width: 100%;
+        max-width: 340px;
+
+        h2 {
+          text-align: left;
+          padding-left: 30px;
+          font-size: 18px;
+
+          span {
+            padding-left: 3px;
+          }
+        }
+      }
+     
+     button {
+        margin: 5px 10px;
+        height: 40px;
+        padding-left: 10px;
+        padding-right: 10px;
+     }
+
+    }
+  }
+ 
+}

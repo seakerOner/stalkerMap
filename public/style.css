@@ -1,0 +1,164 @@
+@font-face {
+  font-family: "Special Gothic Expanded One";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url("https://cdn.jsdelivr.net/fontsource/fonts/special-gothic-expanded-one@latest/latin-400-normal.woff2") format("woff2"), url("https://cdn.jsdelivr.net/fontsource/fonts/special-gothic-expanded-one@latest/latin-400-normal.woff") format("woff");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "Space Mono";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url("https://cdn.jsdelivr.net/fontsource/fonts/space-mono@latest/latin-400-normal.woff2") format("woff2"), url("https://cdn.jsdelivr.net/fontsource/fonts/space-mono@latest/latin-400-normal.woff") format("woff");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+html {
+  background-color: #111d13;
+  height: 100%;
+}
+
+h1, h2, h3, p, button {
+  font-family: "Special Gothic Expanded One", sans-serif;
+}
+
+button {
+  border-width: 4px;
+  border-style: solid;
+  border-color: transparent;
+  transition: border-color 300ms ease-in-out;
+  border-width: 3px;
+  border-radius: 30px;
+  background-color: #8fb996;
+  font-size: 14px;
+  text-align: center;
+}
+button:hover {
+  border-color: #111d13;
+  cursor: pointer;
+}
+
+header {
+  border-width: 4px;
+  border-style: solid;
+  border-color: transparent;
+  box-shadow: inset 0 9px 9px -9px #111d13, inset 9px 0 9px -9px #111d13;
+  border-radius: 30px;
+  border-color: #415d43;
+  background-color: #a1cca5;
+  width: 100%;
+  max-width: calc(100vw - 250px);
+  margin: 54px auto 20px;
+}
+header h1 {
+  margin: 0;
+  padding-top: 10px;
+  color: #415d43;
+  text-align: center;
+  font-size: 60px;
+}
+header p {
+  margin: 0;
+  padding-bottom: 15px;
+  font-family: "Space Mono", monospace;
+  color: #415d43;
+  text-align: center;
+  font-size: 30px;
+}
+
+.dashboard {
+  width: 100%;
+  max-width: calc(100vw - 250px);
+  margin: 0 auto;
+  display: flex;
+  flex-direction: row;
+  min-height: calc(100vh - 250px);
+  overflow: hidden;
+}
+.dashboard .dashboard-menu {
+  border-width: 4px;
+  border-style: solid;
+  border-color: transparent;
+  box-shadow: inset 0 9px 9px -9px #111d13, inset 9px 0 9px -9px #111d13;
+  border-radius: 30px;
+  border-color: #415d43;
+  background-color: #a1cca5;
+  max-width: 25vw;
+  width: 100%;
+}
+.dashboard .dashboard-menu .menu-header {
+  border-width: 4px;
+  border-style: solid;
+  border-color: transparent;
+  box-shadow: inset 0 9px 9px -9px #111d13, inset 9px 0 9px -9px #111d13;
+  border-radius: 30px;
+  border-color: #111d13;
+  background-color: #415d43;
+  margin: 5px 10px;
+}
+.dashboard .dashboard-menu .menu-header h2 {
+  text-align: center;
+  font-size: 18px;
+}
+.dashboard .dashboard-menu .menu-tree {
+  width: 100%;
+}
+.dashboard .dashboard-menu .menu-tree ul {
+  list-style-type: none;
+}
+.dashboard .dashboard-menu .menu-tree button {
+  margin: 5px 10px;
+  height: 40px;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+.dashboard .dashboard-outputarea {
+  border-width: 4px;
+  border-style: solid;
+  border-color: transparent;
+  box-shadow: inset 0 9px 9px -9px #111d13, inset 9px 0 9px -9px #111d13;
+  border-radius: 30px;
+  border-color: #415d43;
+  background-color: #a1cca5;
+  max-width: 75vw;
+  width: 100%;
+  margin-left: 20px;
+}
+.dashboard .dashboard-outputarea .outputarea-header {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  align-items: center;
+}
+.dashboard .dashboard-outputarea .outputarea-header #selected-file {
+  color: white;
+}
+.dashboard .dashboard-outputarea .outputarea-header div {
+  border-width: 4px;
+  border-style: solid;
+  border-color: transparent;
+  box-shadow: inset 0 9px 9px -9px #111d13, inset 9px 0 9px -9px #111d13;
+  border-radius: 30px;
+  border-color: #111d13;
+  background-color: #415d43;
+  margin: 5px auto 5px 10px;
+  width: 100%;
+  max-width: 340px;
+}
+.dashboard .dashboard-outputarea .outputarea-header div h2 {
+  text-align: left;
+  padding-left: 30px;
+  font-size: 18px;
+}
+.dashboard .dashboard-outputarea .outputarea-header div h2 span {
+  padding-left: 3px;
+}
+.dashboard .dashboard-outputarea .outputarea-header button {
+  margin: 5px 10px;
+  height: 40px;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+/*# sourceMappingURL=style.css.map */

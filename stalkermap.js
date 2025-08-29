@@ -135,6 +135,8 @@ var separator =
           await dirEnum(cleanURLdata, countedWordlist[chosenWordlistClean]);
           console.log(`Directory enumeration done!`);
         }
+        console.log(separator);
+        console.log("");
       } else {
         console.error(`Not a valid wordlist ID!`);
       }
