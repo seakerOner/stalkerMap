@@ -3,7 +3,6 @@ import { getOutputFolder } from "./utils/createOutputDir.js";
 import express from "express";
 import path from "node:path";
 import open from "open";
-
 const desktopOutputFolder = getOutputFolder();
 let domainsPath = `${desktopOutputFolder}/data/appData`;
 let domainNames = fs.readdirSync(domainsPath);
@@ -17,7 +16,7 @@ app.get("/getDomainNames", (req, res) => {
   let htmlToAdd = ``;
   domainNames.forEach((domain) => {
     if (!filesToIgnore.includes(domain)) {
-      htmlToAdd += `<li><button class="root-tree-button">${domain}</button></li>`;
+      htmlToAdd += `<li><button class="root-tree-button domain">${domain}</button></li>`;
     }
   });
   res.send(htmlToAdd);
@@ -31,7 +30,7 @@ app.get("/clickedTreeButton/:clickedNode", async (req, res) => {
   res.send(node);
 });
 
-const server = app.listen(PORT, async () => {
+const server = app.listen(PORT, "127.0.0.1", async () => {
   console.log(`Server running at: http://localhost:${PORT}`);
 
   await open(`http://localhost:${PORT}/stalkermap.html`);
