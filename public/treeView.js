@@ -1,6 +1,6 @@
-let nodesOpen = [];
+let currentBreadCrumb = [];
 let domainSelected = ``;
-let isDomain = false;
+let allDomainsSelectedNodes = [];
 
 window.onload = async () => {
   let rootTreeWebsite = document.getElementById("root-tree");
@@ -14,78 +14,123 @@ window.onload = async () => {
   } catch (err) {
     console.error(`Error getting the hostnames' files..  ${err}`);
   }
+
+  const copyDatabtn = document.getElementById(`copyData`);
+  copyDatabtn.addEventListener("click", () => {
+    let copyData = document.getElementById(`console`).innerText;
+    if (copyData.length == 0) {
+      showMessage(`No text to copy!`, `error`);
+    } else {
+      navigator.clipboard.writeText(copyData);
+      showMessage(`Text copied to clipboard!`, `success`);
+    }
+  });
+
+  const downloadDataBtn = document.getElementById(`downloadData`);
+  downloadDataBtn.addEventListener("click", () => {
+    let dataToDownload = document.getElementById(`console`).innerText;
+    if (dataToDownload.length == 0) {
+      console.log(`No file selected to download!`);
+      showMessage(`No file selected to download!`, `error`);
+    } else {
+      const blob = new Blob([dataToDownload], { type: "application/json" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = document
+        .getElementById(`selected-file`)
+        .innerText.slice(1, -1);
+      a.click();
+      URL.revokeObjectURL(a.href);
+    }
+  });
+
   const treeButtons = document.querySelectorAll(".root-tree-button");
   treeButtons.forEach((button) => {
     button.addEventListener("click", async () => {
-      const pathChoosen = button.innerHTML;
+      const pathChoosen = button.textContent.trim();
       try {
-        nodesOpen.push(pathChoosen);
         let allDomains = document.querySelectorAll(".domain");
         if (domainSelected == ``) {
           allDomains.forEach(async (domain) => {
-            if (domain.innerHTML == pathChoosen) {
+            if (domain.textContent.trim() == pathChoosen) {
               let isToggled = await CheckTableAndToggle(domain);
               if (isToggled == false) {
                 const response = await fetch(
                   `/clickedTreeButton/${pathChoosen}`,
                 );
-                htmlToAdd = await response.text();
-                button.parentElement.insertAdjacentHTML("afterend", htmlToAdd);
-                refreshButtons();
+                htmlToAdd = await response.json();
+                if (htmlToAdd[0] == false) {
+                  button.parentElement.insertAdjacentHTML(
+                    "afterend",
+                    htmlToAdd[1],
+                  );
+                  await refreshButtons();
+                }
               }
               domainSelected = pathChoosen;
+              console.log(`Domain Open: `);
+              console.log(domainSelected);
             }
           });
         } else if (domainSelected != ``) {
           if (domainSelected == pathChoosen) {
             //se clickar no domain que tenho aberto simplesmente dar collapse
             allDomains.forEach(async (domain) => {
-              if (pathChoosen == domain.innerHTML) {
+              if (pathChoosen == domain.textContent.trim()) {
                 let isToggled = await CheckTableAndToggle(domain);
-                if (isToggled == true) domainSelected = ``;
+                if (isToggled == true) {
+                  domainSelected = ``;
+                  //currentBreadCrumb.pop();
+                  //allDomainsSelectedNodes.push(currentBreadCrumb);
+
+                  //currentBreadCrumb = [];
+                }
               }
             });
           } else if (domainSelected != pathChoosen) {
             //se clickar num diferente do que tenho aberto mando fechar o domain anteriormente aberto e abro/mando API do host escolhido
+            let isDomain;
             allDomains.forEach((domain) => {
-              if (domain.innerHTML == pathChoosen) isDomain = true;
+              if (domain.textContent.trim() == pathChoosen) isDomain = true;
             });
             if (isDomain == true) {
               allDomains.forEach(async (domain) => {
-                if (domainSelected == domain.innerHTML) {
-                  let isToggled = await CheckTableAndToggle(domain);
+                if (domainSelected == domain.textContent.trim()) {
+                  await CheckTableAndToggle(domain);
                 }
               });
               allDomains.forEach(async (domain) => {
-                if (pathChoosen == domain.innerHTML) {
+                if (pathChoosen == domain.textContent.trim()) {
                   let isToggledNewMenu = await CheckTableAndToggle(domain);
                   if (isToggledNewMenu == false) {
                     const response = await fetch(
                       `/clickedTreeButton/${pathChoosen}`,
                     );
-                    htmlToAdd = await response.text();
-                    button.parentElement.insertAdjacentHTML(
-                      "afterend",
-                      htmlToAdd,
-                    );
-                    refreshButtons();
+                    htmlToAdd = await response.json();
+                    if (htmlToAdd[0] == false) {
+                      button.parentElement.insertAdjacentHTML(
+                        "afterend",
+                        htmlToAdd[1],
+                      );
+                      await refreshButtons();
+                    }
                   }
+                  //currentBreadCrumb.pop();
+                  //allDomainsSelectedNodes.push(currentBreadCrumb);
+                  //currentBreadCrumb = [];
                   domainSelected = pathChoosen;
+                  console.log(`Domain Open: `);
+                  console.log(currentBreadCrumb);
+                  console.log(`All domains selected and its seletect nodes`);
+                  console.log(allDomainsSelectedNodes);
                 }
               });
             }
           }
         }
-
-        if (nodesOpen.length > 0)
-          if (nodesOpen.includes(pathChoosen)) {
-            // make button collapse the list
-            return;
-          }
-        //const response = await fetch(`/clickedTreeButton/${pathChoosen}`);
-        //htmlToAdd = await response.text();
-        //button.parentElement.insertAdjacentHTML("afterend", htmlToAdd);
-        //refreshButtons();
+        currentBreadCrumb.push(pathChoosen);
+        console.log(`Nodes Open:`);
+        console.log(currentBreadCrumb);
       } catch (error) {
         console.error(`Error getting the hostnames' files..  ${error}`);
       }
@@ -93,30 +138,48 @@ window.onload = async () => {
   });
 };
 
-function refreshButtons(secondWave = false) {
+async function refreshButtons(secondWave = false) {
   let htmlToAdd;
-  let refreshedTreeButtons = document.querySelectorAll(".root-tree-button");
+  let refreshedTreeButtons = document.querySelectorAll(".node");
   refreshedTreeButtons.forEach((refreshedButton) => {
     refreshedButton.addEventListener("click", async () => {
-      const refreshedPathToOpen = refreshedButton.innerHTML;
-      if (nodesOpen.length > 0)
-        if (nodesOpen.includes(refreshedPathToOpen)) {
-          // make button collapse the list
-          return;
-        }
-      try {
-        nodesOpen.push(refreshedPathToOpen);
+      const refreshedPathToOpen = refreshedButton.textContent.trim();
+      const parent = refreshedButton.parentElement;
+      const ul = parent.nextElementSibling;
+
+      if (ul && ul.tagName === "UL") {
+        ul.classList.toggle("hide");
+        console.log(`DEU TOGGLE A OPCAO`);
+      } else {
+        console.log(`nao deu toggle :(`);
+        //if (currentBreadCrumb.includes(refreshedPathToOpen)) {
+        // Verificar se o ficheiro que estou a pegar
+        // console.log(
+        //  `Tenho o mesmo nome de outro ficheiro que chamaste em outra pasta e por isso nao abro, razao: estou dentro da lista dos nodes loaded`,
+        //);
+        //return;
+        //}
+        currentBreadCrumb.push(refreshedPathToOpen);
         const refreshedResponse = await fetch(
           `/clickedTreeButton/${refreshedPathToOpen}`,
         );
-        htmlToAdd = ` `;
-        htmlToAdd = await refreshedResponse.text();
-        refreshedButton.parentElement.insertAdjacentHTML("afterend", htmlToAdd);
-        if (secondWave == false) {
-          refreshButtons(true);
+        htmlToAdd = await refreshedResponse.json();
+        if (htmlToAdd[0] == false) {
+          refreshedButton.parentElement.insertAdjacentHTML(
+            "afterend",
+            htmlToAdd[1],
+          );
+          if (secondWave == false) {
+            await refreshButtons(true);
+          }
+        } else if (htmlToAdd[0] == true) {
+          let consoleToOutput = document.getElementById(`console`);
+          let currentFileOutput = document.getElementById(`selected-file`);
+          consoleToOutput.textContent = JSON.stringify(htmlToAdd[1], null, 2);
+          currentFileOutput.innerHTML = JSON.stringify(htmlToAdd[2]);
         }
-      } catch (err) {
-        console.error(`Error getting the hostnames' files..  ${err}`);
+        console.log(`Nodes open (refreshed btns):`);
+        console.log(currentBreadCrumb);
       }
     });
   });
@@ -138,4 +201,24 @@ async function CheckTableAndToggle(domain) {
       return true;
     }
   } else return false;
+}
+
+function showMessage(text, type = "success", duration = 2000) {
+  const box = document.getElementById("messageBox");
+  box.textContent = text;
+  box.className = `message-box ${type}`;
+  box.style.display = "block";
+  box.offsetHeight;
+  box.style.opacity = "1";
+  box.style.transform = "translate(-50%, -50%) scale(1)";
+
+  setTimeout(() => {
+    box.style.opacity = "0";
+    box.style.transform = "translate(-50%, -50%) scale(0.8)";
+
+    box.addEventListener("transitionend", function handler() {
+      box.style.display = "none";
+      box.removeEventListener("transitionend", handler);
+    });
+  }, duration);
 }

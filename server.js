@@ -16,7 +16,7 @@ app.get("/getDomainNames", (req, res) => {
   let htmlToAdd = ``;
   domainNames.forEach((domain) => {
     if (!filesToIgnore.includes(domain)) {
-      htmlToAdd += `<li><button class="root-tree-button domain">${domain}</button></li>`;
+      htmlToAdd += `<li><button class="root-tree-button domain"><img src="./folder.png" alt="Directory File" />${domain}</button></li>`;
     }
   });
   res.send(htmlToAdd);
@@ -27,7 +27,7 @@ app.get("/clickedTreeButton/:clickedNode", async (req, res) => {
   const node = await searchCLickedNode(domainsPath, target);
   console.log(`Node:`);
   console.log(node);
-  res.send(node);
+  res.json(node);
 });
 
 const server = app.listen(PORT, "127.0.0.1", async () => {
@@ -44,7 +44,7 @@ process.on("SIGINT", () => {
 });
 
 function searchCLickedNode(domainsPath, target) {
-  let htmlToSend = `<ul>`;
+  let htmlToSend = `<ul class="ul-mode">`;
   const files = fs.readdirSync(domainsPath);
   for (const file of files) {
     const isDIR = fs.statSync(`${domainsPath}/${file}`).isDirectory();
@@ -53,10 +53,14 @@ function searchCLickedNode(domainsPath, target) {
       if (file == target) {
         const subFiles = fs.readdirSync(newPath);
         subFiles.forEach((subFile) => {
-          htmlToSend += `<li><button class="root-tree-button">${subFile}</button></li>`;
+          const whatTypeOfFile = checkWhatType(newPath, subFile);
+          if (whatTypeOfFile == `dir`)
+            htmlToSend += `<li><button class="root-tree-button node"><img src="./folder.png" alt="Directory File" />${subFile}</button></li>`;
+          if (whatTypeOfFile == `file`)
+            htmlToSend += `<li><button class="root-tree-button node"><img src="./json-file.png" alt="Json File" />${subFile}</button></li>`;
         });
         htmlToSend += `</ul>`;
-        return htmlToSend;
+        return [false, htmlToSend];
       } else {
         const result = searchCLickedNode(newPath, target);
         if (result) return result;
@@ -67,8 +71,13 @@ function searchCLickedNode(domainsPath, target) {
           encoding: "utf8",
         });
         let fileDataParsed = JSON.parse(fileData);
-        return fileDataParsed;
+        if (fileDataParsed) return [true, fileDataParsed, file];
       }
     }
   }
+}
+
+function checkWhatType(newPath, subFile) {
+  if (fs.statSync(`${newPath}/${subFile}`).isDirectory() == true) return "dir";
+  if (fs.statSync(`${newPath}/${subFile}`).isFile() == true) return `file`;
 }

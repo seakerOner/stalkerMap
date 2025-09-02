@@ -24,13 +24,19 @@
       <section class="dashboard-outputarea">
         <div class="outputarea-header">
           <div>
-            <h2>Current file: <span id="selected-file"> Banana </span></h2>
+            <h2>Current file: <span id="selected-file" class="json"></span></h2>
           </div>
-          <button>Copy Data</button>
-          <button>Download file</button>
+          <div id="messageBox" class="message-box"></div>
+          <button id="copyData">
+            <img src="./copy.png" alt="Copy data" /> Copy Data
+          </button>
+          <button id="downloadData">
+            <img src="./download.png" alt="Download data" /> Download file
+          </button>
         </div>
         <div class="outputarea-console">
           <!--Console goes here-->
+          <pre><code id="console"></code></pre>
         </div>
       </section>
     </div>
