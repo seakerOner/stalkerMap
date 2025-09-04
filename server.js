@@ -7,6 +7,7 @@ const desktopOutputFolder = getOutputFolder();
 let domainsPath = `${desktopOutputFolder}/data/appData`;
 let domainNames = fs.readdirSync(domainsPath);
 let filesToIgnore = ["misc", "wordlists"];
+let isFromCurrentDomain = false;
 const app = express();
 const PORT = 4200;
 
@@ -22,14 +23,6 @@ app.get("/getDomainNames", (req, res) => {
   res.send(htmlToAdd);
 });
 
-app.get("/clickedTreeButton/:clickedNode", async (req, res) => {
-  let target = req.params.clickedNode;
-  const node = await searchCLickedNode(domainsPath, target);
-  console.log(`Node:`);
-  console.log(node);
-  res.json(node);
-});
-
 const server = app.listen(PORT, "127.0.0.1", async () => {
   console.log(`Server running at: http://localhost:${PORT}`);
 
@@ -43,11 +36,14 @@ process.on("SIGINT", () => {
   });
 });
 
-function searchCLickedNode(domainsPath, target) {
+function searchCLickedNode(domainsPath, target, currentDomain) {
   let htmlToSend = `<ul class="ul-mode">`;
   const files = fs.readdirSync(domainsPath);
   for (const file of files) {
     const isDIR = fs.statSync(`${domainsPath}/${file}`).isDirectory();
+    if (file == currentDomain) {
+      isFromCurrentDomain = true;
+    }
     if (isDIR == true) {
       let newPath = `${domainsPath}/${file}`;
       if (file == target) {
@@ -62,20 +58,35 @@ function searchCLickedNode(domainsPath, target) {
         htmlToSend += `</ul>`;
         return [false, htmlToSend];
       } else {
-        const result = searchCLickedNode(newPath, target);
+        const result = searchCLickedNode(newPath, target, currentDomain);
         if (result) return result;
       }
     } else {
       if (file == target) {
-        let fileData = fs.readFileSync(`${domainsPath}/${file}`, {
-          encoding: "utf8",
-        });
-        let fileDataParsed = JSON.parse(fileData);
-        if (fileDataParsed) return [true, fileDataParsed, file];
+        if (isFromCurrentDomain == true) {
+          let fileData = fs.readFileSync(`${domainsPath}/${file}`, {
+            encoding: "utf8",
+          });
+          let fileDataParsed = JSON.parse(fileData);
+          isFromCurrentDomain = false;
+          if (fileDataParsed) return [true, fileDataParsed, file];
+        }
       }
     }
   }
 }
+
+app.get("/clickedTreeButton/:clickedNode/:currentDomain", async (req, res) => {
+  let target = req.params.clickedNode;
+  let currentDomain = req.params.currentDomain;
+  console.log(
+    `path: ${domainsPath}  target: ${target}, currentDomain: ${currentDomain}`,
+  );
+  const node = await searchCLickedNode(domainsPath, target, currentDomain);
+  console.log(`Node:`);
+  console.log(node);
+  res.json(node);
+});
 
 function checkWhatType(newPath, subFile) {
   if (fs.statSync(`${newPath}/${subFile}`).isDirectory() == true) return "dir";

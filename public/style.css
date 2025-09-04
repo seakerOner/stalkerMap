@@ -113,14 +113,48 @@ header p {
 }
 .dashboard .dashboard-menu .menu-tree {
   width: 100%;
+  /*  horizontal line of the "L" */
+  /*      .ul-node{
+          display: block;
+        }
+
+  */
 }
 .dashboard .dashboard-menu .menu-tree ul {
   list-style-type: none;
 }
-.dashboard .dashboard-menu .menu-tree .ul-node {
-  display: block;
+.dashboard .dashboard-menu .menu-tree li {
+  position: relative;
+  padding-left: 20px;
 }
-.dashboard .dashboard-menu .menu-tree .ul-node.hide {
+.dashboard .dashboard-menu .menu-tree li::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1px;
+  height: 100%;
+  background: #888;
+}
+.dashboard .dashboard-menu .menu-tree li::after {
+  content: "";
+  position: absolute;
+  top: 20px;
+  left: 0;
+  width: 10px;
+  height: 1px;
+  background: #888;
+}
+.dashboard .dashboard-menu .menu-tree li > li::before {
+  top: 0;
+}
+.dashboard .dashboard-menu .menu-tree li > li::after {
+  top: 10px;
+}
+.dashboard .dashboard-menu .menu-tree li:last-child::before {
+  height: 20px;
+}
+.dashboard .dashboard-menu .menu-tree .hide {
   display: none;
 }
 .dashboard .dashboard-menu .menu-tree button {

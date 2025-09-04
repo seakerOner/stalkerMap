@@ -51,12 +51,14 @@ window.onload = async () => {
       try {
         let allDomains = document.querySelectorAll(".domain");
         if (domainSelected == ``) {
+          domainSelected = pathChoosen;
+          currentBreadCrumb = [pathChoosen];
           allDomains.forEach(async (domain) => {
             if (domain.textContent.trim() == pathChoosen) {
               let isToggled = await CheckTableAndToggle(domain);
               if (isToggled == false) {
                 const response = await fetch(
-                  `/clickedTreeButton/${pathChoosen}`,
+                  `/clickedTreeButton/${pathChoosen}/${pathChoosen}`,
                 );
                 htmlToAdd = await response.json();
                 if (htmlToAdd[0] == false) {
@@ -64,10 +66,9 @@ window.onload = async () => {
                     "afterend",
                     htmlToAdd[1],
                   );
-                  await refreshButtons();
+                  await refreshButtons(true);
                 }
               }
-              domainSelected = pathChoosen;
               console.log(`Domain Open: `);
               console.log(domainSelected);
             }
@@ -80,10 +81,8 @@ window.onload = async () => {
                 let isToggled = await CheckTableAndToggle(domain);
                 if (isToggled == true) {
                   domainSelected = ``;
-                  //currentBreadCrumb.pop();
-                  //allDomainsSelectedNodes.push(currentBreadCrumb);
 
-                  //currentBreadCrumb = [];
+                  currentBreadCrumb = [];
                 }
               }
             });
@@ -104,7 +103,7 @@ window.onload = async () => {
                   let isToggledNewMenu = await CheckTableAndToggle(domain);
                   if (isToggledNewMenu == false) {
                     const response = await fetch(
-                      `/clickedTreeButton/${pathChoosen}`,
+                      `/clickedTreeButton/${pathChoosen}/${domainSelected}`,
                     );
                     htmlToAdd = await response.json();
                     if (htmlToAdd[0] == false) {
@@ -112,13 +111,26 @@ window.onload = async () => {
                         "afterend",
                         htmlToAdd[1],
                       );
-                      await refreshButtons();
+                      domainSelected = pathChoosen;
+                      currentBreadCrumb = [pathChoosen];
+                      await refreshButtons(true);
+                    } else if (htmlToAdd[0] == true) {
+                      let consoleToOutput = document.getElementById(`console`);
+                      let currentFileOutput =
+                        document.getElementById(`selected-file`);
+                      consoleToOutput.textContent = JSON.stringify(
+                        htmlToAdd[1],
+                        null,
+                        2,
+                      );
+                      currentFileOutput.innerHTML = JSON.stringify(
+                        htmlToAdd[2],
+                      );
                     }
                   }
                   //currentBreadCrumb.pop();
                   //allDomainsSelectedNodes.push(currentBreadCrumb);
                   //currentBreadCrumb = [];
-                  domainSelected = pathChoosen;
                   console.log(`Domain Open: `);
                   console.log(currentBreadCrumb);
                   console.log(`All domains selected and its seletect nodes`);
@@ -128,7 +140,7 @@ window.onload = async () => {
             }
           }
         }
-        currentBreadCrumb.push(pathChoosen);
+        //currentBreadCrumb.push(pathChoosen);
         console.log(`Nodes Open:`);
         console.log(currentBreadCrumb);
       } catch (error) {
@@ -142,12 +154,19 @@ async function refreshButtons(secondWave = false) {
   let htmlToAdd;
   let refreshedTreeButtons = document.querySelectorAll(".node");
   refreshedTreeButtons.forEach((refreshedButton) => {
-    refreshedButton.addEventListener("click", async () => {
+    // @ts-ignore
+    if (refreshedButton.dataset.listener === "true") return;
+
+    // @ts-ignore
+    refreshedButton.dataset.listener = "true";
+    refreshedButton.addEventListener("click", async (e) => {
       const refreshedPathToOpen = refreshedButton.textContent.trim();
       const parent = refreshedButton.parentElement;
       const ul = parent.nextElementSibling;
 
       if (ul && ul.tagName === "UL") {
+        e.preventDefault();
+        console.log(ul);
         ul.classList.toggle("hide");
         console.log(`DEU TOGGLE A OPCAO`);
       } else {
@@ -161,7 +180,7 @@ async function refreshButtons(secondWave = false) {
         //}
         currentBreadCrumb.push(refreshedPathToOpen);
         const refreshedResponse = await fetch(
-          `/clickedTreeButton/${refreshedPathToOpen}`,
+          `/clickedTreeButton/${refreshedPathToOpen}/${domainSelected}`,
         );
         htmlToAdd = await refreshedResponse.json();
         if (htmlToAdd[0] == false) {
@@ -169,14 +188,14 @@ async function refreshButtons(secondWave = false) {
             "afterend",
             htmlToAdd[1],
           );
-          if (secondWave == false) {
-            await refreshButtons(true);
-          }
+          await refreshButtons(true);
         } else if (htmlToAdd[0] == true) {
           let consoleToOutput = document.getElementById(`console`);
           let currentFileOutput = document.getElementById(`selected-file`);
+
           consoleToOutput.textContent = JSON.stringify(htmlToAdd[1], null, 2);
           currentFileOutput.innerHTML = JSON.stringify(htmlToAdd[2]);
+          await refreshButtons(true);
         }
         console.log(`Nodes open (refreshed btns):`);
         console.log(currentBreadCrumb);

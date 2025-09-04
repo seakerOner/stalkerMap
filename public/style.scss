@@ -143,11 +143,51 @@ header {
         list-style-type: none;
       }
 
-      .ul-node{
+      li{
+        position: relative;
+  padding-left: 20px;
+      }
+
+      li::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1px;    
+  height: 100%;
+  background: #888;
+}
+
+/*  horizontal line of the "L" */
+li::after {
+  content: '';
+  position: absolute;
+  top: 20px;      
+  left: 0;
+  width: 10px;    
+  height: 1px;
+  background: #888;
+}
+
+
+li > li::before {
+  top: 0;
+}
+
+li > li::after {
+  top: 10px;
+}
+
+li:last-child::before {
+  height: 20px; 
+}
+
+/*      .ul-node{
         display: block;
       }
 
-      .ul-node.hide {
+*/
+      .hide {
         display: none;
       }
 
