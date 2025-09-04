@@ -24,9 +24,12 @@ cp -r "$UDP_JSON_FILE" "$OUTPUT_DIR"
 
 # Copy script to /usr/local/bin 
 sudo cp "$DIR/stalkermap.sh" /usr/local/bin/stalkermap
+sudo cp "$DIR/stalkermapDashboard.sh" /usr/local/bin/stalkermapDashboard
 
 
 # Make it executable
 sudo chmod +x /usr/local/bin/stalkermap
+sudo chmod +x /usr/local/bin/stalkermapDashboard
 
 echo "Stalkermap installed with success! You can execute it anywhere!" 
+echo "StalkermapDashboard installed with success! You can execute it anywhere!" 
