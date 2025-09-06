@@ -1,6 +1,4 @@
-let currentBreadCrumb = [];
 let domainSelected = ``;
-let allDomainsSelectedNodes = [];
 
 window.onload = async () => {
   let rootTreeWebsite = document.getElementById("root-tree");
@@ -52,8 +50,9 @@ window.onload = async () => {
         let allDomains = document.querySelectorAll(".domain");
         if (domainSelected == ``) {
           domainSelected = pathChoosen;
-          currentBreadCrumb = [pathChoosen];
-          allDomains.forEach(async (domain) => {
+          console.log(`Domain Open: `);
+          console.log(domainSelected);
+          for (const domain of allDomains) {
             if (domain.textContent.trim() == pathChoosen) {
               let isToggled = await CheckTableAndToggle(domain);
               if (isToggled == false) {
@@ -66,54 +65,62 @@ window.onload = async () => {
                     "afterend",
                     htmlToAdd[1],
                   );
-                  await refreshButtons(true);
+
+                  await refreshButtons();
+                } else if (htmlToAdd[0] == true) {
+                  let consoleToOutput = document.getElementById(`console`);
+                  let currentFileOutput =
+                    document.getElementById(`selected-file`);
+                  consoleToOutput.textContent = JSON.stringify(
+                    htmlToAdd[1],
+                    null,
+                    2,
+                  );
+                  currentFileOutput.innerHTML = JSON.stringify(htmlToAdd[2]);
                 }
               }
-              console.log(`Domain Open: `);
-              console.log(domainSelected);
             }
-          });
+          }
         } else if (domainSelected != ``) {
           if (domainSelected == pathChoosen) {
             //se clickar no domain que tenho aberto simplesmente dar collapse
-            allDomains.forEach(async (domain) => {
+            for (const domain of allDomains) {
               if (pathChoosen == domain.textContent.trim()) {
                 let isToggled = await CheckTableAndToggle(domain);
                 if (isToggled == true) {
                   domainSelected = ``;
-
-                  currentBreadCrumb = [];
                 }
               }
-            });
+            }
           } else if (domainSelected != pathChoosen) {
             //se clickar num diferente do que tenho aberto mando fechar o domain anteriormente aberto e abro/mando API do host escolhido
             let isDomain;
-            allDomains.forEach((domain) => {
+            for (const domain of allDomains) {
               if (domain.textContent.trim() == pathChoosen) isDomain = true;
-            });
+            }
             if (isDomain == true) {
-              allDomains.forEach(async (domain) => {
+              for (const domain of allDomains) {
                 if (domainSelected == domain.textContent.trim()) {
                   await CheckTableAndToggle(domain);
                 }
-              });
-              allDomains.forEach(async (domain) => {
+              }
+              for (const domain of allDomains) {
                 if (pathChoosen == domain.textContent.trim()) {
                   let isToggledNewMenu = await CheckTableAndToggle(domain);
+                  domainSelected = pathChoosen;
+
                   if (isToggledNewMenu == false) {
                     const response = await fetch(
                       `/clickedTreeButton/${pathChoosen}/${domainSelected}`,
                     );
                     htmlToAdd = await response.json();
+
                     if (htmlToAdd[0] == false) {
                       button.parentElement.insertAdjacentHTML(
                         "afterend",
                         htmlToAdd[1],
                       );
-                      domainSelected = pathChoosen;
-                      currentBreadCrumb = [pathChoosen];
-                      await refreshButtons(true);
+                      await refreshButtons();
                     } else if (htmlToAdd[0] == true) {
                       let consoleToOutput = document.getElementById(`console`);
                       let currentFileOutput =
@@ -128,21 +135,11 @@ window.onload = async () => {
                       );
                     }
                   }
-                  //currentBreadCrumb.pop();
-                  //allDomainsSelectedNodes.push(currentBreadCrumb);
-                  //currentBreadCrumb = [];
-                  console.log(`Domain Open: `);
-                  console.log(currentBreadCrumb);
-                  console.log(`All domains selected and its seletect nodes`);
-                  console.log(allDomainsSelectedNodes);
                 }
-              });
+              }
             }
           }
         }
-        //currentBreadCrumb.push(pathChoosen);
-        console.log(`Nodes Open:`);
-        console.log(currentBreadCrumb);
       } catch (error) {
         console.error(`Error getting the hostnames' files..  ${error}`);
       }
@@ -150,7 +147,7 @@ window.onload = async () => {
   });
 };
 
-async function refreshButtons(secondWave = false) {
+async function refreshButtons() {
   let htmlToAdd;
   let refreshedTreeButtons = document.querySelectorAll(".node");
   refreshedTreeButtons.forEach((refreshedButton) => {
@@ -168,17 +165,7 @@ async function refreshButtons(secondWave = false) {
         e.preventDefault();
         console.log(ul);
         ul.classList.toggle("hide");
-        console.log(`DEU TOGGLE A OPCAO`);
       } else {
-        console.log(`nao deu toggle :(`);
-        //if (currentBreadCrumb.includes(refreshedPathToOpen)) {
-        // Verificar se o ficheiro que estou a pegar
-        // console.log(
-        //  `Tenho o mesmo nome de outro ficheiro que chamaste em outra pasta e por isso nao abro, razao: estou dentro da lista dos nodes loaded`,
-        //);
-        //return;
-        //}
-        currentBreadCrumb.push(refreshedPathToOpen);
         const refreshedResponse = await fetch(
           `/clickedTreeButton/${refreshedPathToOpen}/${domainSelected}`,
         );
@@ -188,17 +175,15 @@ async function refreshButtons(secondWave = false) {
             "afterend",
             htmlToAdd[1],
           );
-          await refreshButtons(true);
+          await refreshButtons();
         } else if (htmlToAdd[0] == true) {
           let consoleToOutput = document.getElementById(`console`);
           let currentFileOutput = document.getElementById(`selected-file`);
 
           consoleToOutput.textContent = JSON.stringify(htmlToAdd[1], null, 2);
           currentFileOutput.innerHTML = JSON.stringify(htmlToAdd[2]);
-          await refreshButtons(true);
+          await refreshButtons();
         }
-        console.log(`Nodes open (refreshed btns):`);
-        console.log(currentBreadCrumb);
       }
     });
   });
