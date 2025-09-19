@@ -1,5 +1,10 @@
 <h1>stalkerMap NodeJS prototype (stalkerMap with Rust coming :D)</h1>
 
+<p align="center">
+  <img src="public/StalkerMap_dashboard.png" alt="StalkerMap Dashboard Screenshot" width="600">
+</p>
+
+
 <h2>Features</h2>
 <ul>
   <li>DNS queries</li>
