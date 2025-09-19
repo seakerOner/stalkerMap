@@ -1,24 +1,58 @@
-# stalkerMap NodeJS prototype (stalkerMap with Rust coming :D) 
--DNS queries <br />
--Port Scanner <br />
--Directory enumerator <br />
--Organizes retrieved data on files <br />
--HTML Dashboard to visualize your gathered data <br />
+<h1>stalkerMap NodeJS prototype (stalkerMap with Rust coming :D)</h1>
 
-# How to install the tool:
--Inside the <b>project directory</b> do <b>"chmod +x install-stalkermap.sh"</b> and run <b>"./install-stalkermap.sh"</b> in the terminal to make it executable anywhere on your pc!<br />
+<h2>Features</h2>
+<ul>
+  <li>DNS queries</li>
+  <li>Port Scanner</li>
+  <li>Directory enumerator</li>
+  <li>Organizes retrieved data into files</li>
+  <li>HTML Dashboard to visualize gathered data</li>
+</ul>
 
--Type <b>"stalkermap"</b> on the terminal to run the tool<br />
--Type <b>"stalkermapDashboard"</b> on the terminal to run the API server and get the dashboard! (ctrl + c to turn off the api server)<br />
--Have fun :D<br />
+<h2>Prerequisites</h2>
+<p>Make sure you have <b>Node.js</b> and <b>npm</b> installed.<br>
+You also need to install <b>Express</b> globally or in the project directory:</p>
 
-# Be aware!
-(The HTML Dashboard still has some bugs :p) <br />
--This tool uses on occasion the command "dig" for dns querries, so please have it up to date to avoid errors. <br />
--If you don't want to install the tool and just execute it you can type on the terminal: "node ." or "node stalkermap.js" (node server.js to get the dashboard) inside the project directory to execute it. (Will only use 4 threads as its the default number of threads on NodeJS even if your pc has more than that!) <br />
--All info gathered by the tool will be stored on <b>"~Desktop/stalkermapOUTPUT/data/appData/{targetName}"</b>
-<br /><br />
+<pre><code>npm install express</code></pre>
 
-Thank you for trying out the tool! Im open to hearing new features you would like to be implemented on the final version. <br />
-Bye! I use vim (btw)
+<h2>How to install the tool</h2>
+<p>Inside the <b>project directory</b>, make the install script executable:</p>
+
+<pre><code>chmod +x install-stalkermap.sh</code></pre>
+
+<p>Run the installer:</p>
+
+<pre><code>./install-stalkermap.sh</code></pre>
+
+<p>You can now run the tool anywhere by typing:</p>
+
+<pre><code>stalkermap</code></pre>
+
+<p>To run the API server and get the dashboard:</p>
+
+<pre><code>stalkermapDashboard</code></pre>
+
+<p>Use <b>Ctrl + C</b> to stop the API server.</p>
+
+<p>Alternatively, without installing, you can run:</p>
+
+<pre><code>node .           # Run the tool (default 4 threads)
+node stalkermap.js
+node server.js   # Run the dashboard API
+</code></pre>
+
+<h2>Output</h2>
+<p>All info gathered by the tool will be stored in:</p>
+
+<pre><code>~/Desktop/stalkermapOUTPUT/data/appData/{targetName}</code></pre>
+
+<h2>Notes</h2>
+<ul>
+  <li>The HTML Dashboard may still have some bugs :p</li>
+  <li>The tool occasionally uses the <code>dig</code> command for DNS queries, so make sure it is up to date.</li>
+</ul>
+
+<p>Thank you for trying out the tool!<br>
+I’m open to hearing new features you would like implemented in the final version.<br>
+Bye! I use <b>vim</b> (btw)</p>
 
